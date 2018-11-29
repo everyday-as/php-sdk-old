@@ -1,2 +1,2 @@
-# gmoddstore-php-sdk
+# gmodstore-php-sdk
 GmodStore PHP SDK
