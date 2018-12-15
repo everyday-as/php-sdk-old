@@ -28,7 +28,7 @@ class Team extends Model
                 $users[$i]->user = (new User($users[$i]->user))->setClient($this->client)->with($this->withRelations)->forceExists()->fixRelations();
             }
         }
-        
+
         $this->setRelation('users', $users);
 
         return $users;

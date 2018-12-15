@@ -4,7 +4,6 @@ namespace kanalumaddela\GmodStoreAPI;
 
 use Exception;
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\ServerException;
 use InvalidArgumentException;
@@ -14,21 +13,21 @@ use SteamID;
 class Client
 {
     /**
-     * gmodstore v1 api url
+     * gmodstore v1 api url.
      *
      * @var string
      */
     const GMS_V1_API = 'https://api.gmodstore.com/';
 
     /**
-     * gmodstore v2 api url
+     * gmodstore v2 api url.
      *
      * @var string
      */
     const GMS_V2_API = 'https://api.gmodstore.com/v2/';
 
     /**
-     * List of deprecated API versions to trigger a warning on
+     * List of deprecated API versions to trigger a warning on.
      *
      * @var array
      */
@@ -37,35 +36,35 @@ class Client
     ];
 
     /**
-     * Current API version to use by default
+     * Current API version to use by default.
      *
      * @var string
      */
     protected static $latestApi = 'v2';
 
     /**
-     * current api version being used
+     * current api version being used.
      *
      * @var string
      */
     protected $version;
 
     /**
-     * gmodstore api version url currently being used
+     * gmodstore api version url currently being used.
      *
      * @var string
      */
     protected $apiVersionUrl;
 
     /**
-     * API key for gmodstore
+     * API key for gmodstore.
      *
-     * @var string $secret
+     * @var string
      */
     protected $secret;
 
     /**
-     * API endpoint name
+     * API endpoint name.
      *
      * @var string
      */
@@ -74,45 +73,45 @@ class Client
     protected static $endpoints = [
         'v1' => [
             'addons' => 'api/scripts/info',
-            'users' => 'users/search/steam64',
+            'users'  => 'users/search/steam64',
         ],
         'v2' => [
             'addons' => 'addons',
-            'teams' => 'teams',
-            'users' => 'users',
-        ]
+            'teams'  => 'teams',
+            'users'  => 'users',
+        ],
     ];
 
     /**
-     * API endpoint url path
+     * API endpoint url path.
      *
      * @var string
      */
     protected $endpointUrl = '';
 
     /**
-     * Array of params for endpoint
+     * Array of params for endpoint.
      *
      * @var array
      */
     protected $endpointParams = [];
 
     /**
-     * Data to send to the endpoint for POST/PUT/PATCH requests
+     * Data to send to the endpoint for POST/PUT/PATCH requests.
      *
      * @var array
      */
     protected $endpointData = [];
 
     /**
-     * Array of urls paths to append to endpoint
+     * Array of urls paths to append to endpoint.
      *
      * @var array
      */
     protected $endpointExtras = [];
 
     /**
-     * The full API request URL
+     * The full API request URL.
      *
      * @var string
      */
@@ -122,56 +121,56 @@ class Client
      * @var array
      */
     protected static $modelRelations = [
-        'addon' => Addon::class,
+        'addon'  => Addon::class,
         'coupon' => Coupon::class,
-        'user' => User::class,
-        'team' => Team::class,
+        'user'   => User::class,
+        'team'   => Team::class,
     ];
 
     /**
-     * Array of relationships
+     * Array of relationships.
      *
      * @var array
      */
     protected $with = [];
 
     /**
-     * HTTP method for request
+     * HTTP method for request.
      *
      * @var string
      */
     protected $method = 'GET';
 
     /**
-     * Guzzle instance
+     * Guzzle instance.
      *
      * @var \GuzzleHttp\Client
      */
     protected $guzzle;
 
     /**
-     * Guzzle options
+     * Guzzle options.
      *
      * @var array
      */
     protected $guzzleOptions = [];
 
     /**
-     * Guzzle response
+     * Guzzle response.
      *
      * @var \GuzzleHttp\Psr7\Response
      */
     protected $response;
 
     /**
-     * Response body content
+     * Response body content.
      *
      * @var
      */
     protected $responseBody;
 
     /**
-     * Error response, if any
+     * Error response, if any.
      *
      * @var
      */
@@ -182,6 +181,7 @@ class Client
      *
      * @param $secret
      * @param array $options
+     *
      * @throws Exception
      */
     public function __construct($secret, array $options = [])
@@ -213,8 +213,10 @@ class Client
      *
      * @param $name
      * @param $arguments
-     * @return Client|null
+     *
      * @throws Exception
+     *
+     * @return Client|null
      */
     public function __call($name, $arguments)
     {
@@ -224,7 +226,7 @@ class Client
     }
 
     /**
-     * Get currently set API version
+     * Get currently set API version.
      *
      * @return string
      */
@@ -234,12 +236,14 @@ class Client
     }
 
     /**
-     * Set API version
+     * Set API version.
      *
      * @param $version
      * @param bool $ignoreDeprecated
-     * @return $this
+     *
      * @throws Exception
+     *
+     * @return $this
      */
     protected function setApiVersion($version, $ignoreDeprecated = false)
     {
@@ -250,11 +254,11 @@ class Client
             $ignoreDeprecated = false;
         }
 
-        $constant = "self::GMS_V".$version."_API";
+        $constant = 'self::GMS_V'.$version.'_API';
         if (!\defined($constant)) {
             throw new Exception('This API version is not defined.');
         }
-        
+
         if (\in_array($versionName, self::$deprecatedApis)) {
             if (!$ignoreDeprecated) {
                 \trigger_error("V{$version} API is deprecated and can lead to unexpected results. If you fully understand this, pass the \$ignoreDeprecated = true arg in this method or pass \$options['ignoreDeprecatedApi'] = true");
@@ -268,7 +272,7 @@ class Client
     }
 
     /**
-     * Set Guzzle headers
+     * Set Guzzle headers.
      *
      * @param array $headers
      */
@@ -278,8 +282,8 @@ class Client
     }
 
     /**
-     * Build the request URL
-     * 
+     * Build the request URL.
+     *
      * @return string
      */
     public function buildRequestUrl()
@@ -288,24 +292,26 @@ class Client
     }
 
     /**
-     * Return the return URL
-     * 
+     * Return the return URL.
+     *
      * @return string
      */
     public function getRequestUrl()
     {
         $this->requestUrl = $this->buildRequestUrl();
-        
+
         return $this->requestUrl;
     }
 
     /**
-     * Perform the request and return the appropriate data
+     * Perform the request and return the appropriate data.
      *
      * @param bool $assoc
-     * @return bool|mixed
+     *
      * @throws Exception
      * @throws GuzzleException
+     *
+     * @return bool|mixed
      */
     public function send($assoc = false)
     {
@@ -366,38 +372,43 @@ class Client
                 return $data;
                 break;
             case 'post':
-                var_dump($data);die();
+                var_dump($data); die();
+
                 return $this->response->getStatusCode() === 201;
                 break;
             case 'put':
-                var_dump($data);die();
+                var_dump($data); die();
+
                 return $this->response->getStatusCode() === 200;
                 break;
             case 'delete':
                 var_dump('delete');
                 var_dump($this->response->getStatusCode());
                 die();
+
                 return $this->response->getStatusCode() === 204;
                 break;
         }
     }
 
     /**
-     * Get the 'raw' response data
+     * Get the 'raw' response data.
      *
      * @param bool $assoc
-     * @return bool|mixed
+     *
      * @throws Exception
+     *
+     * @return bool|mixed
      */
     public function raw($assoc = false)
     {
         return $this->send($assoc);
     }
 
-
     /**
-     * @return bool|Collection|mixed
      * @throws Exception
+     *
+     * @return bool|Collection|mixed
      */
     public function get()
     {
@@ -436,11 +447,12 @@ class Client
 
     /**
      * @param $data
+     *
      * @return Collection
      */
     protected function parseData($data)
     {
-        if (($length = \count($data))  < 1) {
+        if (($length = \count($data)) < 1) {
             return $data;
         }
 
@@ -470,7 +482,7 @@ class Client
                 $key = $keys[$z];
 
                 if (is_object($data->{$key})) {
-                    $data->{$key} = isset(self::$modelRelations[$key]) ? new self::$modelRelations[$key](new Collection($data->{$key})) :$this->parseData($data->{$key});
+                    $data->{$key} = isset(self::$modelRelations[$key]) ? new self::$modelRelations[$key](new Collection($data->{$key})) : $this->parseData($data->{$key});
                 }
             }
         }
@@ -487,8 +499,10 @@ class Client
 
     /**
      * @param mixed ...$params
-     * @return $this
+     *
      * @throws Exception
+     *
+     * @return $this
      */
     public function set(...$params)
     {
@@ -501,12 +515,8 @@ class Client
         return $this;
     }
 
-
-
-
-
     /**
-     * Return the response
+     * Return the response.
      *
      * @return \GuzzleHttp\Psr7\Response
      */
@@ -526,7 +536,7 @@ class Client
     }
 
     /**
-     * Check if request failed
+     * Check if request failed.
      *
      * @return bool
      */
@@ -543,13 +553,13 @@ class Client
         return $this->error;
     }
 
-
     /*** START V1 API METHODS ***/
 
     /**
-     * Search users by name or steamid
+     * Search users by name or steamid.
      *
      * @param $search
+     *
      * @return $this
      */
     public function searchUsers($search)
@@ -557,7 +567,7 @@ class Client
         $this->checkVersion(self::GMS_V1_API);
 
         $this->method = 'get';
-        $this->endpointUrl = "users/search/:user";
+        $this->endpointUrl = 'users/search/:user';
 
         // todo: fix this
 
@@ -566,14 +576,13 @@ class Client
 
     /*** END V1 API METHODS ***/
 
-
     /*** START V2 API METHODS ***/
 
-
     /**
-     * Relations to load
+     * Relations to load.
      *
      * @param mixed ...$relations
+     *
      * @return $this
      */
     public function with(...$relations)
@@ -588,9 +597,10 @@ class Client
     }
 
     /**
-     * Get the details of the user
+     * Get the details of the user.
      *
      * @param $user
+     *
      * @return User
      */
     public function getUser($user)
@@ -598,9 +608,8 @@ class Client
         return (new User($user))->setClient($this);
     }
 
-
     /**
-     * Set a specific addon to retrieve
+     * Set a specific addon to retrieve.
      *
      * @param $id
      */
@@ -610,9 +619,10 @@ class Client
     }
 
     /**
-     * Use the addons endpoint
+     * Use the addons endpoint.
      *
      * @param null $id
+     *
      * @return $this
      */
     public function addons($id = null)
@@ -623,10 +633,10 @@ class Client
 
         switch ($this->apiVersionUrl) {
             case self::GMS_V1_API:
-                $this->endpointUrl = "scripts/info/%s";
+                $this->endpointUrl = 'scripts/info/%s';
                 break;
             case self::GMS_V2_API:
-                $this->endpointUrl = "addons/";
+                $this->endpointUrl = 'addons/';
                 break;
         }
 
@@ -639,7 +649,7 @@ class Client
     }
 
     /**
-     * Sets the current api endpoint as teams
+     * Sets the current api endpoint as teams.
      *
      * @return $this
      */
@@ -663,7 +673,7 @@ class Client
     }
 
     /**
-     * Retrieve multiple users
+     * Retrieve multiple users.
      *
      * @return $this
      */
@@ -683,11 +693,13 @@ class Client
     }
 
     /**
-     * Get a single user
+     * Get a single user.
      *
      * @param $user
-     * @return $this
+     *
      * @throws Exception
+     *
+     * @return $this
      */
     public function user($user)
     {
@@ -712,11 +724,13 @@ class Client
     }
 
     /**
-     * Add the coupons sub-endpoint
+     * Add the coupons sub-endpoint.
      *
      * @param null $id
-     * @return $this
+     *
      * @throws Exception
+     *
+     * @return $this
      */
     public function coupons($couponId = null)
     {
@@ -734,8 +748,6 @@ class Client
         return $this;
     }
 
-
-
     public function purchases()
     {
         if (!in_array($this->endpoint, ['addons', 'users'])) {
@@ -748,11 +760,13 @@ class Client
     }
 
     /**
-     * Add the coupons sub-endpoint
+     * Add the coupons sub-endpoint.
      *
      * @param null $versionId
-     * @return $this
+     *
      * @throws Exception
+     *
+     * @return $this
      */
     public function versions($versionId = null)
     {
@@ -770,14 +784,11 @@ class Client
         return $this;
     }
 
-
-
-
-
     /**
-     * Get the details of a team
+     * Get the details of a team.
      *
      * @param $id
+     *
      * @return Team
      */
     public function getTeam($id)
@@ -785,14 +796,12 @@ class Client
         return (new Team($id))->setClient($this);
     }
 
-
-
-
     /**
-     * Get the addons of the user of the api key given
+     * Get the addons of the user of the api key given.
+     *
+     * @throws Exception
      *
      * @return array|mixed|null
-     * @throws Exception
      */
     public function getMyAddons()
     {
@@ -811,6 +820,7 @@ class Client
 
     /**
      * @param $id
+     *
      * @return Addon
      */
     public function getAddon($id)
@@ -820,8 +830,10 @@ class Client
 
     /**
      * @param null $addonId
-     * @return mixed|null
+     *
      * @throws Exception
+     *
+     * @return mixed|null
      */
     public function getCoupons($addonId = null)
     {
@@ -830,26 +842,27 @@ class Client
         if (is_int($addonId)) {
             $this->addons($addonId);
         }
-        
+
         if (empty($this->endpoint) || $this->endpoint !== 'addons') {
             throw new Exception(empty($this->endpoint) ? 'API endpoint not set. Make sure you pass the $addonId' : "API endpoint must be 'addons'. Current endpoint: {$this->endpoint}");
         }
 
         $this->coupons();
-        
+
         return $this->send();
     }
 
-
     /**
      * Get purchases for a specified endpoint.
-     * If no endpoint is specified, default to users()
+     * If no endpoint is specified, default to users().
      *
      * @param null $id
      * @param bool $withAddon
      * @param bool $assoc
-     * @return bool|mixed
+     *
      * @throws Exception
+     *
+     * @return bool|mixed
      */
     public function getPurchases($id = null, $withAddon = false, $assoc = false)
     {
@@ -899,9 +912,10 @@ class Client
     }
 
     /**
-     * Get the users for a team
+     * Get the users for a team.
      *
      * @param null $id
+     *
      * @return $this
      */
     public function getUsers($id = null, $assoc = false)
@@ -921,29 +935,9 @@ class Client
 
         $this->with('user');
         $this->endpointExtras = ['users'];
-        
+
         return $this->send($assoc);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     public function getTeams($id = null, $assoc = false)
     {
@@ -967,20 +961,12 @@ class Client
 
     /*** END V2 API METHODS ***/
 
-
-
-
-
-
-
-
     public function getWith()
     {
         $this->fixWidth();
 
         return $this->with;
     }
-
 
     protected function setEndpoint($endpoint)
     {

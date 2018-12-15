@@ -14,8 +14,8 @@ class User extends Model
     public static $endpoint = 'users';
 
     /**
-     * User constructor. Check if argument is a steamid or not and convert it
-     * 
+     * User constructor. Check if argument is a steamid or not and convert it.
+     *
      * @param array $attributes
      */
     public function __construct($attributes = [])
@@ -24,7 +24,8 @@ class User extends Model
             try {
                 $xpaw = new SteamID($attributes);
                 $attributes = $xpaw->ConvertToUInt64();
-            } catch (InvalidArgumentException $e) {}
+            } catch (InvalidArgumentException $e) {
+            }
         }
 
         parent::__construct($attributes);
@@ -41,13 +42,14 @@ class User extends Model
         return $bans;
     }
 
-
     /**
-     * Get a user's purchases and optionally retrieve the addon along with it
+     * Get a user's purchases and optionally retrieve the addon along with it.
      *
      * @param bool $withAddon
-     * @return array|mixed|null
+     *
      * @throws Exception
+     *
+     * @return array|mixed|null
      */
     public function getPurchases($withAddon = false)
     {
@@ -81,10 +83,11 @@ class User extends Model
     }
 
     /**
-     * Get a user's teams
+     * Get a user's teams.
+     *
+     * @throws Exception
      *
      * @return array|mixed|null
-     * @throws Exception
      */
     public function getTeams()
     {

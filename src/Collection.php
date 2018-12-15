@@ -2,8 +2,8 @@
 
 namespace kanalumaddela\GmodStoreAPI;
 
-use JsonSerializable;
 use ArrayAccess;
+use JsonSerializable;
 
 class Collection implements JsonSerializable, ArrayAccess
 {
@@ -14,6 +14,7 @@ class Collection implements JsonSerializable, ArrayAccess
 
     /**
      * Collection constructor.
+     *
      * @param array|object $attributes
      */
     public function __construct($attributes = [])
@@ -33,10 +34,10 @@ class Collection implements JsonSerializable, ArrayAccess
         return $this->toJson();
     }
 
-
     /**
      * @param $key
      * @param null $default
+     *
      * @return mixed|null
      */
     public function get($key, $default = null)
@@ -45,7 +46,7 @@ class Collection implements JsonSerializable, ArrayAccess
     }
 
     /**
-     * Returns the attributes of the model
+     * Returns the attributes of the model.
      *
      * @return array
      */
@@ -57,6 +58,7 @@ class Collection implements JsonSerializable, ArrayAccess
     /**
      * @param int $options
      * @param int $depth
+     *
      * @return mixed|null
      */
     public function toJson($options = 0, $depth = 512)
@@ -65,7 +67,6 @@ class Collection implements JsonSerializable, ArrayAccess
 
         return $json !== false ? $json : null;
     }
-
 
     /**
      * @return array|mixed
@@ -77,6 +78,7 @@ class Collection implements JsonSerializable, ArrayAccess
 
     /**
      * @param mixed $offset
+     *
      * @return bool
      */
     public function offsetExists($offset)
@@ -86,6 +88,7 @@ class Collection implements JsonSerializable, ArrayAccess
 
     /**
      * @param mixed $offset
+     *
      * @return mixed|null
      */
     public function offsetGet($offset)

@@ -10,12 +10,12 @@ class Addon extends Model
      * {@inheritdoc}
      */
     public static $endpoint = 'addons';
-    
+
     /**
      * {@inheritdoc}
      */
     protected static $modelRelations = [
-        'team' => Team::class
+        'team' => Team::class,
     ];
 
     /**
@@ -34,11 +34,13 @@ class Addon extends Model
     }
 
     /**
-     * Get all purchases for an addon
+     * Get all purchases for an addon.
      *
      * @param bool $withUser
-     * @return array|bool|mixed
+     *
      * @throws Exception
+     *
+     * @return array|bool|mixed
      */
     public function getPurchases($withUser = false)
     {
@@ -72,10 +74,11 @@ class Addon extends Model
     }
 
     /**
-     * Get all coupons for an addon
-     * 
-     * @return array|mixed|null
+     * Get all coupons for an addon.
+     *
      * @throws Exception
+     *
+     * @return array|mixed|null
      */
     public function getCoupons()
     {
@@ -83,12 +86,13 @@ class Addon extends Model
             $coupons = [];
         }
 
-        dump($this->client->getWith());die();
+        dump($this->client->getWith());
+        die();
 
         if (($length = \count($coupons)) > 0) {
             for ($i = 0; $i < $length; $i++) {
                 $coupon = (new Coupon($coupons[$i]))->setClient($this->getClient())->with($this->withRelations)->forceExists()->fixRelations();
-                
+
                 //$addon = clone $this;
                 $coupons[$i] = $coupon->setRelation('addon_id', $this->id);
             }
@@ -100,24 +104,25 @@ class Addon extends Model
     }
 
     /**
-     * Get all versions for an addon
+     * Get all versions for an addon.
+     *
+     * @throws Exception
      *
      * @return array|bool|mixed
-     * @throws Exception
      */
     public function getVersions()
     {
         if (\is_null($versions = $this->newRequest()->getVersions())) {
             $versions = [];
         }
-        
+
         $this->setRelation('versions', $versions);
-        
+
         if (!$this->relationLoaded('latest_version')) {
             $this->setRelation('latest_version', $versions[0]);
             $this->withRelations = array_merge(['latest_version'], $this->withRelations);
         }
-        
+
         return $versions;
     }
 }
