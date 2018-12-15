@@ -9,70 +9,68 @@ use ReflectionMethod;
 
 abstract class Model implements JsonSerializable
 {
-
     /**
-     * Tells if the model exists
+     * Tells if the model exists.
      *
      * @var bool
      */
     public $exists = false;
 
     /**
-     * Tells if the model was recently retrieved from the API
+     * Tells if the model was recently retrieved from the API.
      *
      * @var bool
      */
     public $recentlyAttempted = false;
 
     /**
-     * Timestamp when the model was last retrieved
-     * 
+     * Timestamp when the model was last retrieved.
+     *
      * @var int
      */
     public $lastAttempted;
 
     /**
-     * Endpoint name
-     * 
+     * Endpoint name.
+     *
      * @var string
      */
     public static $endpoint = 'test';
 
     /**
-     * API client
+     * API client.
      *
      * @var Client
      */
     protected $client;
 
     /**
-     * Attributes of the model
+     * Attributes of the model.
      *
      * @var Collection
      */
     protected $attributes = [];
 
     /**
-     * Loaded relationships for the model
+     * Loaded relationships for the model.
      *
      * @var array
      */
     protected $relations = [];
 
     /**
-     * List of relating models that will be instantiad to their respactive classes
+     * List of relating models that will be instantiad to their respactive classes.
      *
      * @var array
      */
     protected static $modelRelations = [];
 
     /**
-     * Relations originating from the ?with query param
+     * Relations originating from the ?with query param.
      *
      * @var array
      */
     protected $withRelations = [];
-
 
     public function __construct($attributes = [])
     {
@@ -84,10 +82,10 @@ abstract class Model implements JsonSerializable
                 $attributes = new Collection($attributes);
             }
         }
-        
+
         $this->attributes = $attributes;
     }
-    
+
     public function __isset($name)
     {
         return isset($this->attributes[$name]) || isset($this->relations[$name]);
@@ -95,9 +93,9 @@ abstract class Model implements JsonSerializable
 
     public function __get($name)
     {
-        if (!$this->relationLoaded($name) && \method_exists($this, 'get' . \ucfirst($name))) {
+        if (!$this->relationLoaded($name) && \method_exists($this, 'get'.\ucfirst($name))) {
             try {
-                \call_user_func_array([$this, 'get' . \ucfirst($name)], []);
+                \call_user_func_array([$this, 'get'.\ucfirst($name)], []);
                 /*
                 $reflectionMethod = new ReflectionMethod(static::class, 'get' . \ucfirst($name));
 
@@ -105,14 +103,15 @@ abstract class Model implements JsonSerializable
                     \call_user_func_array([$this, 'get' . \ucfirst($name)], []);
                 }
                 */
-            } catch (ReflectionException $e) {}
+            } catch (ReflectionException $e) {
+            }
         }
 
         return isset($this->attributes[$name]) ? $this->attributes[$name] : $this->getRelation($name);
     }
 
     /**
-     * Returns toJson()
+     * Returns toJson().
      *
      * @return false|string
      */
@@ -130,7 +129,7 @@ abstract class Model implements JsonSerializable
     }
 
     /**
-     * Returns the attributes of the model
+     * Returns the attributes of the model.
      *
      * @return array
      */
@@ -140,7 +139,7 @@ abstract class Model implements JsonSerializable
     }
 
     /**
-     * Returns json encoded string of model attributes
+     * Returns json encoded string of model attributes.
      *
      * @return false|string
      */
@@ -148,7 +147,6 @@ abstract class Model implements JsonSerializable
     {
         return \call_user_func_array('json_encode', [$this->toArray(), $options, $depth]);
     }
-
 
     public function setClient(Client $client)
     {
@@ -162,7 +160,7 @@ abstract class Model implements JsonSerializable
     }
 
     /**
-     * Return the Client instance
+     * Return the Client instance.
      *
      * @return Client
      */
@@ -172,9 +170,9 @@ abstract class Model implements JsonSerializable
     }
 
     /**
-     * Force a model's existance state to true 
-     * (in the case it was retrieved via a relation)
-     * 
+     * Force a model's existance state to true
+     * (in the case it was retrieved via a relation).
+     *
      * @return $this
      */
     public function forceExists()
@@ -182,14 +180,15 @@ abstract class Model implements JsonSerializable
         $this->recentlyAttempted = true;
         $this->lastAttempted = \time();
         $this->exists = true;
-        
+
         return $this;
     }
-    
+
     /**
-     * Checks if a relation is loaded
+     * Checks if a relation is loaded.
      *
      * @param $name
+     *
      * @return bool
      */
     public function relationLoaded($name)
@@ -198,9 +197,10 @@ abstract class Model implements JsonSerializable
     }
 
     /**
-     * Returns a relation or null
+     * Returns a relation or null.
      *
      * @param $name
+     *
      * @return mixed|null
      */
     public function getRelation($name)
@@ -209,10 +209,11 @@ abstract class Model implements JsonSerializable
     }
 
     /**
-     * Sets a relation
+     * Sets a relation.
      *
      * @param $name
      * @param $data
+     *
      * @return $this
      */
     public function setRelation($name, $data)
@@ -223,9 +224,10 @@ abstract class Model implements JsonSerializable
     }
 
     /**
-     * Remove all or certain relations from a model
-     * 
+     * Remove all or certain relations from a model.
+     *
      * @param mixed ...$relations
+     *
      * @return $this
      */
     public function removeRelations(...$relations)
@@ -233,26 +235,26 @@ abstract class Model implements JsonSerializable
         if (isset($relations[0]) && \is_array($relations[0])) {
             $relations = $relations[0];
         }
-        
+
         if (count($relations) === 0) {
             $relations = $this->getRelations();
         }
 
         $length = count($relations);
-        
+
         for ($i = 0; $i < $length; $i++) {
             $relation = $relations[$i];
-            
+
             if (isset($this->relations[$relation])) {
                 unset($this->relations[$relation]);
             }
         }
-        
+
         return $this;
     }
 
     /**
-     * Return array of loaded relations
+     * Return array of loaded relations.
      *
      * @return array
      */
@@ -262,7 +264,7 @@ abstract class Model implements JsonSerializable
     }
 
     /**
-     * Set proper relations and instantiate where needed
+     * Set proper relations and instantiate where needed.
      *
      * @return $this
      */
@@ -278,7 +280,7 @@ abstract class Model implements JsonSerializable
                     $this->setRelation($relation, (object) $this->attributes[$relation]);
                     unset($this->attributes[$relation]);
                 }
-                
+
                 if ($this->relationLoaded($relation)) {
                     if (isset(static::$modelRelations[$relation])) {
                         $data = (new static::$modelRelations[$relation]($this->getRelation($relation)))->setClient($this->client)->with($allRelations)->forceExists();
@@ -294,15 +296,16 @@ abstract class Model implements JsonSerializable
     }
 
     /**
-     * Sets the with() relations for the API
+     * Sets the with() relations for the API.
      *
      * @param mixed ...$relations
+     *
      * @return $this
      */
     public function with(...$relations)
     {
         \call_user_func_array([$this->client, 'with'], $relations);
-        
+
         $this->withRelations = $this->client->getWith();
 
         return $this;
@@ -318,8 +321,8 @@ abstract class Model implements JsonSerializable
 
         $data = $this->newRequest()->get();
 
-        $this->attributes =  !\is_null($data) ? $data : [];
-        
+        $this->attributes = !\is_null($data) ? $data : [];
+
         //$this->attributes = $this->client->with($this->withRelations)->{static::$endpoint}()->set($this->id)->get(true);
         $this->exists = !\is_null($data);
 
@@ -347,8 +350,8 @@ abstract class Model implements JsonSerializable
     }
 
     /**
-     * Sets up the client with the appropriate endpoints and relations
-     * 
+     * Sets up the client with the appropriate endpoints and relations.
+     *
      * @return Client
      */
     protected function newRequest()

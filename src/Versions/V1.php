@@ -9,11 +9,9 @@ use kanalumaddela\GmodStoreAPI\User;
 
 class V1 implements VersionInterface
 {
-
-
-
     /**
      * @param $id
+     *
      * @return mixed|Addon
      */
     public function addon($id)
@@ -23,6 +21,7 @@ class V1 implements VersionInterface
 
     /**
      * @param array $ids
+     *
      * @return mixed|Collection
      */
     public function addons(array $ids)
@@ -32,6 +31,7 @@ class V1 implements VersionInterface
 
     /**
      * @param $id
+     *
      * @return mixed|User
      */
     public function user($id)
@@ -41,6 +41,7 @@ class V1 implements VersionInterface
 
     /**
      * @param array $ids
+     *
      * @return mixed|Collection
      */
     public function users(array $ids)

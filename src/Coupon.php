@@ -12,7 +12,7 @@ class Coupon extends Model
      * {@inheritdoc}
      */
     public static $endpoint = 'addons';
-    
+
     /**
      * {@inheritdoc}
      */
@@ -46,9 +46,9 @@ class Coupon extends Model
         if (!isset($this->addon->id) && !isset($this->addon_id)) {
             throw new Exception('Addon ID not provided, cannot retrieve.');
         }
-        
+
         $addonId = isset($this->addon->id) ? $this->addon->id : $this->addon_id;
-        
+
         return parent::newRequest()->{static::$endpoint}($addonId)->coupons(isset($this->id) ? $this->id : null);
     }
 }
