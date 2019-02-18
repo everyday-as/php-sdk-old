@@ -23,7 +23,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     public $lastAttempted;
 
     /**
-     * The endpoint name for the model
+     * The endpoint name for the model.
      *
      * @var string
      */
@@ -51,21 +51,21 @@ abstract class Model implements ArrayAccess, JsonSerializable
     protected $relations = [];
 
     /**
-     * Array of ?with relations currently loaded for this resource
+     * Array of ?with relations currently loaded for this resource.
      *
      * @var array
      */
     protected $withRelations = [];
 
     /**
-     * Valid array of relations including ?with and sub endpoints
+     * Valid array of relations including ?with and sub endpoints.
      *
      * @var array
      */
     protected static $validRelations = [];
 
     /**
-     * Valid array of ?with relations for a resource
+     * Valid array of ?with relations for a resource.
      *
      * @var array
      */
@@ -80,12 +80,11 @@ abstract class Model implements ArrayAccess, JsonSerializable
     protected static $generatedWithRelations = [];
 
     /**
-     * Array of relation -> model class
+     * Array of relation -> model class.
      *
      * @var array
      */
     protected static $modelRelations = [];
-
 
     /**
      * Model constructor.
@@ -145,7 +144,6 @@ abstract class Model implements ArrayAccess, JsonSerializable
     {
         return $this->toJson();
     }
-
 
     /**
      * {@inheritdoc}
@@ -214,7 +212,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * Set the Client to use for the model
+     * Set the Client to use for the model.
      *
      * @param \GmodStore\API\Client $client
      *
@@ -242,7 +240,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * Remove the Client instance where it's not needed
+     * Remove the Client instance where it's not needed.
      *
      * @return $this
      */
@@ -349,8 +347,9 @@ abstract class Model implements ArrayAccess, JsonSerializable
     /**
      * Set proper relations and instantiate where needed.
      *
-     * @return $this
      * @throws Exception
+     *
+     * @return $this
      */
     public function fixRelations()
     {
@@ -429,7 +428,7 @@ abstract class Model implements ArrayAccess, JsonSerializable
 
     /**
      * Check if the model was recently retrieved from the API
-     * 5 mins or less is considered recent
+     * 5 mins or less is considered recent.
      *
      * @return bool
      */
