@@ -1,13 +1,12 @@
 <?php
 
-namespace kanalumaddela\GmodStoreAPI;
+namespace GmodStore\API;
 
+use ArrayAccess;
 use Exception;
 use JsonSerializable;
-use ReflectionException;
-use ReflectionMethod;
 
-abstract class Model implements JsonSerializable
+abstract class Model implements ArrayAccess, JsonSerializable
 {
     /**
      * Tells if the model exists.
@@ -17,25 +16,18 @@ abstract class Model implements JsonSerializable
     public $exists = false;
 
     /**
-     * Tells if the model was recently retrieved from the API.
-     *
-     * @var bool
-     */
-    public $recentlyAttempted = false;
-
-    /**
-     * Timestamp when the model was last retrieved.
+     * UNIX epoch timestamp when the model was last retrieved.
      *
      * @var int
      */
     public $lastAttempted;
 
     /**
-     * Endpoint name.
+     * The endpoint name for the model
      *
      * @var string
      */
-    public static $endpoint = 'test';
+    public static $endpoint = '';
 
     /**
      * API client.
@@ -59,31 +51,79 @@ abstract class Model implements JsonSerializable
     protected $relations = [];
 
     /**
-     * List of relating models that will be instantiad to their respactive classes.
-     *
-     * @var array
-     */
-    protected static $modelRelations = [];
-
-    /**
-     * Relations originating from the ?with query param.
+     * Array of ?with relations currently loaded for this resource
      *
      * @var array
      */
     protected $withRelations = [];
 
-    public function __construct($attributes = [])
+    /**
+     * Valid array of relations including ?with and sub endpoints
+     *
+     * @var array
+     */
+    protected static $validRelations = [];
+
+    /**
+     * Valid array of ?with relations for a resource
+     *
+     * @var array
+     */
+    protected static $validWithRelations = [];
+
+    /**
+     * Full possible list of ?with relations that can be requested on
+     * the resource and its related resources.
+     *
+     * @var array
+     */
+    protected static $generatedWithRelations = [];
+
+    /**
+     * Array of relation -> model class
+     *
+     * @var array
+     */
+    protected static $modelRelations = [];
+
+
+    /**
+     * Model constructor.
+     *
+     * @param array|\GmodStore\API\Collection $attributes
+     * @param \GmodStore\API\Client|null      $client
+     */
+    public function __construct($attributes = [], Client $client = null)
     {
-        if (\is_string($attributes) || \is_int($attributes)) {
-            $attributes = ['id' => $attributes];
+        if (!$attributes instanceof Collection) {
+            $attributes = new Collection($attributes);
         }
-        if (\is_object($attributes)) {
-            if (!$attributes instanceof Collection) {
-                $attributes = new Collection($attributes);
-            }
+
+        static::$validRelations = \array_values(\array_unique(\array_merge(static::$validRelations, static::$validWithRelations, \array_keys(self::$modelRelations))));
+        static::$generatedWithRelations = self::getFullWithRelations();
+
+        if ($client) {
+            $this->setClient($client);
         }
 
         $this->attributes = $attributes;
+    }
+
+    public function __call($name, $arguments)
+    {
+        if (strpos($name, 'get') === 0 && method_exists($this->client->getClientVersion(), ($callMethod = substr_replace($name, (new \ReflectionClass($this))->getShortName(), 3, 0)))) {
+            $relation = strtolower(substr($name, 3));
+
+            \call_user_func_array([$this->client, 'with'], $this->withRelations);
+
+            $value = call_user_func_array([$this->client, $callMethod], empty($arguments) ? ([$this] ?? []) : $arguments);
+
+            if (!empty($value)) {
+                $this->setRelation($relation, $value);
+            }
+        }
+
+        return $value ?? null;
     }
 
     public function __isset($name)
@@ -93,21 +133,7 @@ abstract class Model implements JsonSerializable
 
     public function __get($name)
     {
-        if (!$this->relationLoaded($name) && \method_exists($this, 'get'.\ucfirst($name))) {
-            try {
-                \call_user_func_array([$this, 'get'.\ucfirst($name)], []);
-                /*
-                $reflectionMethod = new ReflectionMethod(static::class, 'get' . \ucfirst($name));
-
-                if ($reflectionMethod->getNumberOfRequiredParameters() === 0) {
-                    \call_user_func_array([$this, 'get' . \ucfirst($name)], []);
-                }
-                */
-            } catch (ReflectionException $e) {
-            }
-        }
-
-        return isset($this->attributes[$name]) ? $this->attributes[$name] : $this->getRelation($name);
+        return $this->attributes->get($name) ?? $this->getRelation($name);
     }
 
     /**
@@ -118,6 +144,45 @@ abstract class Model implements JsonSerializable
     public function __toString()
     {
         return $this->toJson();
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetExists($offset)
+    {
+        return $this->__isset($offset);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetGet($offset)
+    {
+        return $this->__get($offset);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws Exception
+     */
+    public function offsetSet($offset, $value)
+    {
+        if (\is_null($offset)) {
+            throw new Exception('$offset must be a valid key.');
+        }
+
+        $this->attributes[$offset] = $value;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->attributes[$offset]);
     }
 
     /**
@@ -143,11 +208,18 @@ abstract class Model implements JsonSerializable
      *
      * @return false|string
      */
-    public function toJson($options = 0, $depth = 512)
+    public function toJson()
     {
-        return \call_user_func_array('json_encode', [$this->toArray(), $options, $depth]);
+        return \call_user_func_array('json_encode', \array_merge([$this->toArray()], \func_get_args()));
     }
 
+    /**
+     * Set the Client to use for the model
+     *
+     * @param \GmodStore\API\Client $client
+     *
+     * @return $this
+     */
     public function setClient(Client $client)
     {
         $this->client = $client;
@@ -170,6 +242,18 @@ abstract class Model implements JsonSerializable
     }
 
     /**
+     * Remove the Client instance where it's not needed
+     *
+     * @return $this
+     */
+    public function removeClient()
+    {
+        $this->client = null;
+
+        return $this;
+    }
+
+    /**
      * Force a model's existance state to true
      * (in the case it was retrieved via a relation).
      *
@@ -177,7 +261,6 @@ abstract class Model implements JsonSerializable
      */
     public function forceExists()
     {
-        $this->recentlyAttempted = true;
         $this->lastAttempted = \time();
         $this->exists = true;
 
@@ -236,11 +319,11 @@ abstract class Model implements JsonSerializable
             $relations = $relations[0];
         }
 
-        if (count($relations) === 0) {
+        if (\count($relations) === 0) {
             $relations = $this->getRelations();
         }
 
-        $length = count($relations);
+        $length = \count($relations);
 
         for ($i = 0; $i < $length; $i++) {
             $relation = $relations[$i];
@@ -267,29 +350,22 @@ abstract class Model implements JsonSerializable
      * Set proper relations and instantiate where needed.
      *
      * @return $this
+     * @throws Exception
      */
     public function fixRelations()
     {
-        $allRelations = \array_unique(\array_merge($this->getRelations(), $this->withRelations));
+        if (\count($relations = \array_intersect(static::$generatedWithRelations, \array_keys($this->attributes->toArray()))) > 0) {
+            $matchingWith = [];
+            foreach ($relations as $relation) {
+                $this->setRelation($relation, $this->attributes[$relation]);
+                unset($this->attributes[$relation]);
 
-        if (($length = \count($allRelations)) > 0) {
-            for ($i = 0; $i < $length; $i++) {
-                $relation = $allRelations[$i];
-
-                if (isset($this->attributes[$relation])) {
-                    $this->setRelation($relation, (object) $this->attributes[$relation]);
-                    unset($this->attributes[$relation]);
-                }
-
-                if ($this->relationLoaded($relation)) {
-                    if (isset(static::$modelRelations[$relation])) {
-                        $data = (new static::$modelRelations[$relation]($this->getRelation($relation)))->setClient($this->client)->with($allRelations)->forceExists();
-                        $this->setRelation($relation, $data);
-                    }
-                } else {
-                    throw new Exception("Relation '{$relation}' not found. Make sure the relation exists at this endpoint.");
+                if (\in_array($relation, static::$validWithRelations)) {
+                    $matchingWith[] = $relation;
                 }
             }
+
+            \call_user_func_array([$this, 'setWith'], $matchingWith);
         }
 
         return $this;
@@ -304,34 +380,46 @@ abstract class Model implements JsonSerializable
      */
     public function with(...$relations)
     {
-        \call_user_func_array([$this->client, 'with'], $relations);
+        if ($relations !== $this->withRelations) {
+            \call_user_func_array([$this, 'setWith'], $relations);
+        }
 
-        $this->withRelations = $this->client->getWith();
+        \call_user_func_array([$this->client, 'with'], $this->withRelations);
+
+        return $this;
+    }
+
+    public function setWith(...$relations)
+    {
+        if (\is_array($relations[0])) {
+            $relations = $relations[0];
+        }
+
+        if (!empty($relations)) {
+            $relations = \array_unique(\array_filter($relations));
+            $validWith = static::$generatedWithRelations;
+
+            $relations = \array_values(\array_unique(\array_intersect($validWith, $relations)));
+
+            if (\count($diff = \array_values(\array_diff($relations, $validWith))) > 0) {
+                throw new \InvalidArgumentException('?with parameters given are not valid: "'.\implode(',', $diff).'"');
+            }
+        }
+
+        $this->withRelations = $relations;
 
         return $this;
     }
 
     public function fresh()
     {
-        if (empty(static::$endpoint)) {
-            static::$endpoint = self::$endpoint;
-        }
-
-        $this->withRelations = \array_unique(\array_merge($this->client->getWith(), $this->withRelations));
-
-        $data = $this->newRequest()->get();
-
-        $this->attributes = !\is_null($data) ? $data : [];
-
-        //$this->attributes = $this->client->with($this->withRelations)->{static::$endpoint}()->set($this->id)->get(true);
-        $this->exists = !\is_null($data);
-
-        $this->recentlyAttempted = true;
         $this->lastAttempted = \time();
 
-        $this->fixRelations();
+        \call_user_func_array([$this, 'with'], $this->withRelations);
 
-        return $this;
+        $this->attributes = \call_user_func_array([$this->client, static::$endpoint], [$this])->get();
+
+        return $this->fixRelations();
     }
 
     public function refresh()
@@ -339,9 +427,15 @@ abstract class Model implements JsonSerializable
         return $this->fresh();
     }
 
+    /**
+     * Check if the model was recently retrieved from the API
+     * 5 mins or less is considered recent
+     *
+     * @return bool
+     */
     public function recentlyAttempted()
     {
-        return $this->recentlyAttempted;
+        return (\time() - $this->lastAttempted) <= 300;
     }
 
     public function exists()
@@ -349,13 +443,14 @@ abstract class Model implements JsonSerializable
         return $this->exists;
     }
 
-    /**
-     * Sets up the client with the appropriate endpoints and relations.
-     *
-     * @return Client
-     */
-    protected function newRequest()
+    public static function getFullWithRelations()
     {
-        return $this->client->{static::$endpoint}(isset($this->id) ? $this->id : null)->with($this->withRelations);
+        $validWith = static::$validWithRelations;
+
+        foreach (static::$modelRelations as $relation => $class) {
+            $validWith = \array_merge($validWith, $class::getFullWithRelations());
+        }
+
+        return \array_unique($validWith);
     }
 }

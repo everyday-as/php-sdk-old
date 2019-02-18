@@ -1,15 +1,15 @@
 {
-    "name": "kanalumaddela/gmodstore-api-php",
+    "name": "gmodstore/gmodstore-php-sdk",
     "description": "API wrapper for gmodstore.com's api written in PHP",
     "type": "library",
     "require": {
-        "php": ">=5.6",
+        "php": ">=7.0.32",
         "ext-json": "*",
         "guzzlehttp/guzzle": "^6.3",
         "xpaw/steamid": "dev-master"
     },
     "license": "MIT",
-    "homepage": "https://www.maddela.org",
+    "homepage": "https://www.gmodstore.com",
     "authors": [
         {
             "name": "Sam",
@@ -18,7 +18,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "kanalumaddela\\GmodStoreAPI\\": "src/"
+            "GmodStore\\API\\": "src/"
         }
     }
 }

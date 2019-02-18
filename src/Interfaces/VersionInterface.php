@@ -1,39 +1,46 @@
 <?php
 
-namespace kanalumaddela\GmodStoreAPI\Interfaces;
-
-use kanalumaddela\GmodStoreAPI\Addon;
-use kanalumaddela\GmodStoreAPI\Client;
-use kanalumaddela\GmodStoreAPI\Collection;
-use kanalumaddela\GmodStoreAPI\User;
+namespace GmodStore\API\Interfaces;
 
 interface VersionInterface
 {
+
     /**
-     * @param $id
+     * Base URL for the endpoints
      *
-     * @return Client
+     * @var string
+     */
+    const URL_BASE = 'https://api.gmodstore.com';
+
+    /**
+     * Get the name of this API version
+     *
+     * @return string
+     */
+    public function getName();
+
+    /**
+     * Get the API version's URL endpoint
+     *
+     * @return string
+     */
+    public function getUrl();
+
+    /**
+     * Get the endpoint URL for the Addon resource
+     *
+     * @param int $id
+     *
+     * @return string
      */
     public function addon($id);
 
     /**
-     * @param array $ids
+     * Get the endpoint URL for the User resource
      *
-     * @return mixed|Collection
-     */
-    public function addons(array $ids);
-
-    /**
-     * @param $id
+     * @param int|string $id
      *
-     * @return Client
+     * @return string
      */
     public function user($id);
-
-    /**
-     * @param array $ids
-     *
-     * @return mixed|Collection
-     */
-    public function users(array $ids);
 }

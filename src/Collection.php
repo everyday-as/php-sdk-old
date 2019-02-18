@@ -1,11 +1,12 @@
 <?php
 
-namespace kanalumaddela\GmodStoreAPI;
+namespace GmodStore\API;
 
 use ArrayAccess;
+use Countable;
 use JsonSerializable;
 
-class Collection implements JsonSerializable, ArrayAccess
+class Collection implements ArrayAccess, Countable, JsonSerializable
 {
     /**
      * @var array
@@ -19,8 +20,8 @@ class Collection implements JsonSerializable, ArrayAccess
      */
     public function __construct($attributes = [])
     {
-        if (is_object($attributes)) {
-            $attributes = (array) $attributes;
+        if (\is_object($attributes)) {
+            $attributes = $attributes instanceof self ? $attributes->toArray() : (array) $attributes;
         }
 
         $this->attributes = $attributes;
@@ -34,8 +35,18 @@ class Collection implements JsonSerializable, ArrayAccess
         return $this->toJson();
     }
 
+    public function __isset($name)
+    {
+        return $this->offsetExists($name);
+    }
+
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
+
     /**
-     * @param $key
+     * @param      $key
      * @param null $default
      *
      * @return mixed|null
@@ -98,9 +109,11 @@ class Collection implements JsonSerializable, ArrayAccess
 
     public function offsetSet($offset, $value)
     {
-        dump($offset);
-        dump($value);
-        die();
+        if (is_null($offset)) {
+            $this->attributes[] = $value;
+        } else {
+            $this->attributes[$offset] = $value;
+        }
     }
 
     /**
@@ -109,5 +122,25 @@ class Collection implements JsonSerializable, ArrayAccess
     public function offsetUnset($offset)
     {
         unset($this->attributes[$offset]);
+    }
+
+    public function isEmpty()
+    {
+        return count($this->empty) || empty($this->attributes);
+    }
+
+    /**
+     * Count elements of an object
+     *
+     * @link  https://php.net/manual/en/countable.count.php
+     * @return int The custom count as an integer.
+     * </p>
+     * <p>
+     * The return value is cast to an integer.
+     * @since 5.1.0
+     */
+    public function count()
+    {
+        return \count($this->attributes);
     }
 }
