@@ -14,7 +14,6 @@ use InvalidArgumentException;
 
 class V2 extends ClientVersion
 {
-
     /**
      * {@inheritdoc}
      */
@@ -44,7 +43,7 @@ class V2 extends ClientVersion
     }
 
     /**
-     * Tell the client to create a resource
+     * Tell the client to create a resource.
      *
      * @param array $data
      *
@@ -56,7 +55,7 @@ class V2 extends ClientVersion
     }
 
     /**
-     * Tell the client to update a resource
+     * Tell the client to update a resource.
      *
      * @param array $data
      *
@@ -75,7 +74,7 @@ class V2 extends ClientVersion
     }
 
     /**
-     * Tell the client to delete a resource
+     * Tell the client to delete a resource.
      *
      * @return mixed
      */
@@ -93,7 +92,6 @@ class V2 extends ClientVersion
 
         return $this;
     }
-
 
     /**
      * {@inheritdoc}
@@ -153,12 +151,12 @@ class V2 extends ClientVersion
     }
 
     /**
-     * Set the coupons sub endpoint
-     *
-     * @return $this
+     * Set the coupons sub endpoint.
      *
      * @throws EndpointException
      * @throws \Exception
+     *
+     * @return $this
      */
     public function coupons(): self
     {
@@ -172,13 +170,13 @@ class V2 extends ClientVersion
     }
 
     /**
-     * Setup client to retrieve an Addon Coupon resource
+     * Setup client to retrieve an Addon Coupon resource.
      *
      * @param $id
      *
-     * @return $this
-     *
      * @throws \GmodStore\API\Exceptions\EndpointException
+     *
+     * @return $this
      */
     public function coupon($id): self
     {
@@ -194,12 +192,12 @@ class V2 extends ClientVersion
     }
 
     /**
-     * Sets the purchases sub endpoint
-     *
-     * @return $this
+     * Sets the purchases sub endpoint.
      *
      * @throws EndpointException
      * @throws \Exception
+     *
+     * @return $this
      */
     public function purchases(): self
     {
@@ -211,7 +209,6 @@ class V2 extends ClientVersion
 
         return $this;
     }
-
 
     /**
      * {@inheritdoc}
@@ -247,8 +244,9 @@ class V2 extends ClientVersion
     /**
      * @param int $addonId
      *
-     * @return Collection
      * @throws \Exception
+     *
+     * @return Collection
      */
     public function getAddonCoupons($addon): Collection
     {

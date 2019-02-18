@@ -20,36 +20,35 @@ interface ClientVersionInterface
     public function __construct(Client $client);
 
     /**
-     * Get the version name
+     * Get the version name.
      *
      * @return string
      */
     public function getName(): string;
 
     /**
-     * Get the base URL for the API version
+     * Get the base URL for the API version.
      *
      * @return string
      */
     public function getUrl(): string;
 
-
     /**
-     * Get the current API url being used
+     * Get the current API url being used.
      *
      * @return string
      */
     public function getCurrentUrl(): string;
 
     /**
-     * Tell the client to get a resource
+     * Tell the client to get a resource.
      *
      * @return Collection
      */
     public function get(): Collection;
 
     /**
-     * Tell the client to create a resource
+     * Tell the client to create a resource.
      *
      * @param array $data
      *
@@ -58,7 +57,7 @@ interface ClientVersionInterface
     public function create(array $data = []);
 
     /**
-     * Tell the client to update a resource
+     * Tell the client to update a resource.
      *
      * @param array $data
      *
@@ -67,27 +66,23 @@ interface ClientVersionInterface
     public function update(array $data = []);
 
     /**
-     * Tell the client to delete a resource
+     * Tell the client to delete a resource.
      *
      * @return mixed
      */
     public function delete();
 
-
-
-
     /*** Resource Endpoints ***/
 
-
     /**
-     * Setup the client to use the addons endpoint
+     * Setup the client to use the addons endpoint.
      *
      * @return self
      */
     public function addons();
 
     /**
-     * Setup the client for specific addon
+     * Setup the client for specific addon.
      *
      * @param int $id
      *
@@ -95,9 +90,8 @@ interface ClientVersionInterface
      */
     public function addon($id);
 
-
     /**
-     * Get a single Addon resource
+     * Get a single Addon resource.
      *
      * @param $id
      *
@@ -106,7 +100,7 @@ interface ClientVersionInterface
     public function getAddon($id): Addon;
 
     /**
-     * Get a Collection of Addon when given list of ids
+     * Get a Collection of Addon when given list of ids.
      *
      * @param mixed ...$ids
      *
@@ -115,7 +109,7 @@ interface ClientVersionInterface
     public function getAddons(...$ids): Collection;
 
     /**
-     * Get the addons the owner of the apu key is authored on
+     * Get the addons the owner of the apu key is authored on.
      *
      * @return Collection
      */
@@ -134,7 +128,6 @@ interface ClientVersionInterface
      * @return Collection
      */
     public function getAddonCoupons($addonId): Collection;
-
 
     /**
      * @param int $addonId

@@ -7,7 +7,6 @@ use GmodStore\API\Model;
 
 class Addon extends Model
 {
-
     public static $endpoint = 'addon';
 
     protected static $validRelations = [

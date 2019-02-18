@@ -9,7 +9,6 @@ use SteamID;
 
 class User extends Model
 {
-
     /**
      * {@inheritdoc}
      */
@@ -32,7 +31,6 @@ class User extends Model
      */
     public function __construct($attributes = [], Client $client = null)
     {
-
         if (\is_string($attributes) || \is_int($attributes)) {
             try {
                 $xpaw = new SteamID($attributes);

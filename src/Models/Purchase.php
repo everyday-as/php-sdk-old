@@ -2,7 +2,6 @@
 
 namespace GmodStore\API\Models;
 
-
 use GmodStore\API\Model;
 
 class Purchase extends Model

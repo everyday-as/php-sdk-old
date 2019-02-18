@@ -15,7 +15,7 @@ class Client
     const VERSION = '0.0.1';
 
     /**
-     * Current version being used by the client
+     * Current version being used by the client.
      *
      * @var ClientVersion
      */
@@ -163,7 +163,6 @@ class Client
             throw new InvalidArgumentException('$options[\'guzzle\'] must be an instance of \GuzzleHttp\Client');
         }
 
-
         $this->setSecret($secret)
             ->setClientVersion($options['version'] ?? self::$latestVersion)
             ->setGuzzleOptions($options['guzzleOptions'] ?? [])
@@ -171,19 +170,19 @@ class Client
     }
 
     /**
-     * Magic __call method to pass methods to the current version client
+     * Magic __call method to pass methods to the current version client.
      *
      * @param $name
      * @param $arguments
      *
-     * @return $this
-     *
      * @throws \ReflectionException
+     *
+     * @return $this
      */
     public function __call($name, $arguments)
     {
         if (!method_exists($this->clientVersion, $name)) {
-            throw new BadMethodCallException;
+            throw new BadMethodCallException();
         }
 
         if (strpos($name, 'get') === 0) {
@@ -236,13 +235,13 @@ class Client
     }
 
     /**
-     * Set the API client version to use
+     * Set the API client version to use.
      *
      * @param $version
      *
-     * @return $this
-     *
      * @throws \Exception
+     *
+     * @return $this
      */
     public function setClientVersion($version): self
     {
@@ -267,7 +266,7 @@ class Client
     }
 
     /**
-     * Configure options for Guzzle client
+     * Configure options for Guzzle client.
      *
      * @param array $options
      *
@@ -312,7 +311,7 @@ class Client
     }
 
     /**
-     * Make the request and return the response instance
+     * Make the request and return the response instance.
      *
      * @return \GuzzleHttp\Psr7\Response
      */
@@ -378,7 +377,7 @@ class Client
     }
 
     /**
-     * Get the array of ?with relations
+     * Get the array of ?with relations.
      *
      * @return array
      */
@@ -388,11 +387,11 @@ class Client
     }
 
     /**
-     * Get the current endpoint set on the client
-     *
-     * @return string
+     * Get the current endpoint set on the client.
      *
      * @throws Exception
+     *
+     * @return string
      */
     public function getEndpoint(): string
     {
@@ -405,7 +404,7 @@ class Client
 
     /**
      * Set the current endpoint name being used.
-     * Can be in dot notation e.g. addons.coupons
+     * Can be in dot notation e.g. addons.coupons.
      *
      * @param string $name
      *
@@ -419,7 +418,7 @@ class Client
     }
 
     /**
-     * Set the endpoint URL
+     * Set the endpoint URL.
      *
      * @param string $url
      *
@@ -447,7 +446,7 @@ class Client
     }
 
     /**
-     * Add parameters to the endpoint
+     * Add parameters to the endpoint.
      *
      * @param array $params
      *
@@ -461,7 +460,7 @@ class Client
     }
 
     /**
-     * Get the endpoint URL with the parameters added in
+     * Get the endpoint URL with the parameters added in.
      *
      * @return string
      */
