@@ -7,8 +7,14 @@ use GmodStore\API\Model;
 
 class Addon extends Model
 {
+    /**
+     * {@inheritdoc}
+     */
     public static $endpoint = 'addon';
 
+    /**
+     * {@inheritdoc}
+     */
     protected static $validRelations = [
         'coupons',
         'purchases',
@@ -16,6 +22,9 @@ class Addon extends Model
         'versions',
     ];
 
+    /**
+     * {@inheritdoc}
+     */
     protected static $validWithRelations = [
         'latest_version',
         'team',

@@ -6,19 +6,31 @@ use GmodStore\API\Model;
 
 class Team extends Model
 {
+    /**
+     * {@inheritdoc}
+     */
     public static $endpoint = 'teams';
 
+    /**
+     * {@inheritdoc}
+     */
     protected static $validRelations = [
         'users',
     ];
 
+    /**
+     * {@inheritdoc}
+     */
     protected static $validWithRelations = [
         'primaryAuthor',
         'primary_author',
-        'user',
     ];
 
+    /**
+     * {@inheritdoc}
+     */
     protected static $modelRelations = [
-        'user' => User::class,
+        'primaryAuthor' => PrimaryAuthor::class,
+        'primary_author' => PrimaryAuthor::class,
     ];
 }

@@ -16,7 +16,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
     /**
      * Collection constructor.
      *
-     * @param array|object $attributes
+     * @param array|object|\GmodStore\API\Collection $attributes
      */
     public function __construct($attributes = [])
     {
@@ -28,18 +28,24 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function __toString()
     {
         return $this->toJson();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function __isset($name)
     {
         return $this->offsetExists($name);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function __get($name)
     {
         return $this->get($name);
@@ -53,7 +59,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
      */
     public function get($key, $default = null)
     {
-        return (!is_null($value = $this->offsetGet($key))) ? $value : $default;
+        return (!\is_null($value = $this->offsetGet($key))) ? $value : $default;
     }
 
     /**
@@ -70,7 +76,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
      * @param int $options
      * @param int $depth
      *
-     * @return mixed|null
+     * @return string|null
      */
     public function toJson($options = 0, $depth = 512)
     {
@@ -80,7 +86,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
     }
 
     /**
-     * @return array|mixed
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {
@@ -88,9 +94,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
     }
 
     /**
-     * @param mixed $offset
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function offsetExists($offset)
     {
@@ -98,18 +102,19 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
     }
 
     /**
-     * @param mixed $offset
-     *
-     * @return mixed|null
+     * {@inheritdoc}
      */
     public function offsetGet($offset)
     {
         return $this->offsetExists($offset) ? $this->attributes[$offset] : null;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function offsetSet($offset, $value)
     {
-        if (is_null($offset)) {
+        if (\is_null($offset)) {
             $this->attributes[] = $value;
         } else {
             $this->attributes[$offset] = $value;
@@ -117,29 +122,25 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
     }
 
     /**
-     * @param mixed $offset
+     * {@inheritdoc}
      */
     public function offsetUnset($offset)
     {
         unset($this->attributes[$offset]);
     }
 
+    /**
+     * Check if the Collection is empty
+     *
+     * @return bool
+     */
     public function isEmpty()
     {
-        return count($this->empty) || empty($this->attributes);
+        return empty($this->attributes) || $this->count() === 0;
     }
 
     /**
-     * Count elements of an object.
-     *
-     * @link  https://php.net/manual/en/countable.count.php
-     *
-     * @return int The custom count as an integer.
-     *             </p>
-     *             <p>
-     *             The return value is cast to an integer.
-     *
-     * @since 5.1.0
+     * {@inheritdoc}
      */
     public function count()
     {

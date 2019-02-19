@@ -81,8 +81,8 @@ class Client
         'team'           => Models\Team::class,
         'author'         => Models\User::class,
         'user'           => Models\User::class,
-        'primaryAuthor'  => Models\User::class,
-        'primary_author' => Models\User::class,
+        'primaryAuthor'  => Models\PrimaryAuthor::class,
+        'primary_author' => Models\PrimaryAuthor::class,
     ];
 
     /**

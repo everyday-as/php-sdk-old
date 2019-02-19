@@ -17,14 +17,6 @@ class V2 extends ClientVersion
     /**
      * {@inheritdoc}
      */
-    public function getName(): string
-    {
-        return __CLASS__;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getUrl(): string
     {
         return self::URL_BASE.'/v2';

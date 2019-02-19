@@ -16,6 +16,17 @@ abstract class ClientVersion implements ClientVersionInterface
         $this->client = $client;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getName(): string
+    {
+        return __CLASS__;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getCurrentUrl(): string
     {
         return $this->client->buildEndpointUrl();
