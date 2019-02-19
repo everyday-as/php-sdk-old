@@ -30,7 +30,7 @@ class Team extends Model
      * {@inheritdoc}
      */
     protected static $modelRelations = [
-        'primaryAuthor' => PrimaryAuthor::class,
+        'primaryAuthor'  => PrimaryAuthor::class,
         'primary_author' => PrimaryAuthor::class,
     ];
 }
