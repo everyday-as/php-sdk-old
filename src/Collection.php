@@ -130,7 +130,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
     }
 
     /**
-     * Check if the Collection is empty
+     * Check if the Collection is empty.
      *
      * @return bool
      */

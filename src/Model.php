@@ -2,7 +2,6 @@
 
 namespace GmodStore\API;
 
-use GmodStore\API\Models\Team;
 use InvalidArgumentException;
 use ReflectionClass;
 use function array_diff;
@@ -20,7 +19,6 @@ use function method_exists;
 use function strpos;
 use function strtolower;
 use function substr;
-
 
 abstract class Model extends Collection
 {
@@ -44,7 +42,7 @@ abstract class Model extends Collection
     public static $booted = false;
 
     /**
-     * List of booted models
+     * List of booted models.
      *
      * @var array
      */
@@ -96,7 +94,7 @@ abstract class Model extends Collection
     /**
      * API client.
      *
-     * @var \GmodStore\API\Client $client
+     * @var \GmodStore\API\Client
      */
     protected $client;
 
@@ -233,7 +231,7 @@ abstract class Model extends Collection
     }
 
     /**
-     * Get array of loaded relations as key => value
+     * Get array of loaded relations as key => value.
      *
      * @return array
      */
@@ -271,7 +269,7 @@ abstract class Model extends Collection
     }
 
     /**
-     * Set the ?with relations when retrieving a model and validate them
+     * Set the ?with relations when retrieving a model and validate them.
      *
      * @param mixed ...$relations
      *
@@ -301,11 +299,10 @@ abstract class Model extends Collection
 
     public function fresh(...$with)
     {
-
     }
 
     /**
-     * Boot the model
+     * Boot the model.
      */
     public static function boot()
     {
@@ -316,7 +313,7 @@ abstract class Model extends Collection
     }
 
     /**
-     * Get the full list of possible relations, both ?with relations and sub endpoints
+     * Get the full list of possible relations, both ?with relations and sub endpoints.
      *
      * @return array
      */

@@ -2,7 +2,6 @@
 
 namespace GmodStore\API\Models;
 
-
 use GmodStore\API\Model;
 
 class PrimaryAuthor extends Model
@@ -20,5 +19,4 @@ class PrimaryAuthor extends Model
     protected static $modelRelations = [
         'user' => User::class,
     ];
-
 }
