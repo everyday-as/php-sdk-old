@@ -14,7 +14,7 @@ class ClientFixed
     protected $secret;
 
     /**
-     * Client options
+     * Client options.
      *
      * @var array
      */

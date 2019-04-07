@@ -37,7 +37,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
         $this->attributes = $attributes;
     }
 
-    function toArray(): array
+    public function toArray(): array
     {
         $array = [];
 
@@ -58,7 +58,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     /*** ArrayAccess ***/
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function offsetExists($offset)
     {
@@ -66,7 +66,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function offsetGet($offset)
     {
@@ -74,7 +74,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function offsetSet($offset, $value)
     {
@@ -87,7 +87,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function offsetUnset($offset)
     {
@@ -98,7 +98,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     /*** Countable ***/
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function count()
     {
@@ -108,7 +108,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     /*** JsonSerializable ***/
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {
@@ -118,7 +118,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     /*** SeekableIterator, Iterator ***/
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function current()
     {
@@ -131,7 +131,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function next()
     {
@@ -141,7 +141,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function key()
     {
@@ -149,7 +149,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function valid()
     {
@@ -157,7 +157,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function rewind()
     {
@@ -165,7 +165,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function seek($position)
     {
