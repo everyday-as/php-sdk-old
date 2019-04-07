@@ -2,12 +2,6 @@
     "name": "gmodstore/gmodstore-php-sdk",
     "description": "API wrapper for gmodstore.com's api written in PHP",
     "type": "library",
-    "require": {
-        "php": ">=7.0.32",
-        "ext-json": "*",
-        "guzzlehttp/guzzle": "^6.3",
-        "xpaw/steamid": "dev-master"
-    },
     "license": "MIT",
     "homepage": "https://www.gmodstore.com",
     "authors": [
@@ -20,5 +14,17 @@
         "psr-4": {
             "GmodStore\\API\\": "src/"
         }
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/kanalumaddela/SteamID.php"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.32",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.3",
+        "xpaw/steamid": "dev-master"
     }
 }

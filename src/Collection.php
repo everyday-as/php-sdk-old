@@ -5,12 +5,17 @@ namespace GmodStore\API;
 use ArrayAccess;
 use Countable;
 use JsonSerializable;
-use function call_user_func_array;
+use OutOfBoundsException;
+use SeekableIterator;
+use function array_keys;
+use function array_merge;
+use function array_search;
+use function call_user_func;
 use function count;
+use function func_get_args;
 use function is_null;
-use function is_object;
 
-class Collection implements ArrayAccess, Countable, JsonSerializable
+class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIterator
 {
     /**
      * @var array
@@ -18,60 +23,42 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
     protected $attributes;
 
     /**
-     * Collection constructor.
-     *
-     * @param array|object|\GmodStore\API\Collection $attributes
+     * @var array
      */
-    public function __construct($attributes = [])
-    {
-        if (is_object($attributes)) {
-            $attributes = $attributes instanceof self ? $attributes->toArray() : (array) $attributes;
-        }
+    protected $keys = [];
 
+    /**
+     * @var int|string
+     */
+    protected $position;
+
+    public function __construct(array $attributes = [])
+    {
         $this->attributes = $attributes;
     }
 
-    /**
-     * Returns the attributes of the model.
-     *
-     * @return array
-     */
-    public function toArray()
+    function toArray(): array
     {
-        return $this->attributes;
+        $array = [];
+
+        foreach ($this->attributes as $index => $item) {
+            $array[$index] = $item instanceof self ? $item->toArray() : $item;
+        }
+
+        return $array;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
+    public function toJson()
     {
-        return $this->toJson();
-    }
-
-    /**
-     * @param int $options
-     * @param int $depth
-     *
-     * @return string|null
-     */
-    public function toJson($options = 0, $depth = 512)
-    {
-        $json = call_user_func_array('json_encode', [$this->toArray(), $options, $depth]);
+        $json = call_user_func('json_encode', array_merge([$this->toArray()], func_get_args()));
 
         return $json !== false ? $json : null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function __isset($name)
-    {
-        return $this->offsetExists($name);
-    }
+    /*** ArrayAccess ***/
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function offsetExists($offset)
     {
@@ -79,75 +66,118 @@ class Collection implements ArrayAccess, Countable, JsonSerializable
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function __get($name)
-    {
-        return $this->get($name);
-    }
-
-    /**
-     * @param      $key
-     * @param null $default
-     *
-     * @return mixed|null
-     */
-    public function get($key, $default = null)
-    {
-        return (!is_null($value = $this->offsetGet($key))) ? $value : $default;
-    }
-
-    /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function offsetGet($offset)
     {
-        return $this->offsetExists($offset) ? $this->attributes[$offset] : null;
+        return $this->attributes[$offset] ?? null;
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        return $this->toArray();
-    }
-
-    /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function offsetSet($offset, $value)
     {
-        if (is_null($offset)) {
+        if (empty($offset)) {
             $this->attributes[] = $value;
         } else {
             $this->attributes[$offset] = $value;
         }
+        $this->updateKeys();
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function offsetUnset($offset)
     {
         unset($this->attributes[$offset]);
+        $this->updateKeys();
     }
 
-    /**
-     * Check if the Collection is empty.
-     *
-     * @return bool
-     */
-    public function isEmpty()
-    {
-        return empty($this->attributes) || $this->count() === 0;
-    }
+    /*** Countable ***/
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function count()
     {
         return count($this->attributes);
+    }
+
+    /*** JsonSerializable ***/
+
+    /**
+     * {@inheritDoc}
+     */
+    public function jsonSerialize()
+    {
+        return $this->toJson();
+    }
+
+    /*** SeekableIterator, Iterator ***/
+
+    /**
+     * {@inheritDoc}
+     */
+    public function current()
+    {
+        if (is_null($this->position)) {
+            $this->updateKeys();
+            $this->position = $this->keys[0];
+        }
+
+        return $this->offsetGet($this->position);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function next()
+    {
+        $next = array_search($this->position, $this->keys) + 1;
+
+        $this->position = $this->keys[$next] ?? null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function key()
+    {
+        return $this->position;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function valid()
+    {
+        return $this->offsetExists($this->position);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function rewind()
+    {
+        $this->position = $this->keys[0];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function seek($position)
+    {
+        if (!$this->offsetExists($position)) {
+            throw new OutOfBoundsException('`'.$position.'` invalid seek position');
+        }
+
+        $this->position = $position;
+    }
+
+    protected function updateKeys()
+    {
+        $this->keys = array_keys($this->attributes);
     }
 }
