@@ -19,49 +19,22 @@ use function method_exists;
 use function strpos;
 use function strtolower;
 use function substr;
+use function time;
 
 abstract class Model extends Collection
 {
-    /**
-     * @var bool
-     */
-    public $exists = false;
-
-    /**
-     * Epoch timestamp of when the model was last retrieved/attempted.
-     *
-     * @var int
-     */
-    public $lastAttempted;
-
     /**
      * Determine if model class was booted.
      *
      * @var bool
      */
     public static $booted = false;
-
     /**
      * List of booted models.
      *
      * @var array
      */
     protected static $bootedModels = [];
-
-    /**
-     * Loaded relationships for the model.
-     *
-     * @var array
-     */
-    protected $relations = [];
-
-    /**
-     * Array of ?with relations currently loaded for this resource.
-     *
-     * @var array
-     */
-    protected $withRelations = [];
-
     /**
      * Full possible list of ?with relations that can be requested on
      * the resource and its related resources.
@@ -69,28 +42,46 @@ abstract class Model extends Collection
      * @var array
      */
     protected static $generatedWithRelations = [];
-
     /**
      * Valid array of relations that are sub endpoints.
      *
      * @var array
      */
     protected static $validRelations = [];
-
     /**
      * Valid array of ?with relations for a resource.
      *
      * @var array
      */
     protected static $validWithRelations = [];
-
     /**
      * Array of relation -> model class.
      *
      * @var array
      */
     protected static $modelRelations = [];
-
+    /**
+     * @var bool
+     */
+    public $exists = false;
+    /**
+     * Epoch timestamp of when the model was last retrieved/attempted.
+     *
+     * @var int
+     */
+    public $lastAttempted;
+    /**
+     * Loaded relationships for the model.
+     *
+     * @var array
+     */
+    protected $relations = [];
+    /**
+     * Array of ?with relations currently loaded for this resource.
+     *
+     * @var array
+     */
+    protected $withRelations = [];
     /**
      * API client.
      *
@@ -111,6 +102,33 @@ abstract class Model extends Collection
         }
     }
 
+    /**
+     * Boot the model.
+     */
+    public static function boot()
+    {
+        static::$booted = true;
+
+        static::$validRelations = array_values(array_unique(array_merge(static::$validRelations, static::$validWithRelations, array_keys(self::$modelRelations))));
+        static::$generatedWithRelations = self::getFullWithRelations();
+    }
+
+    /**
+     * Get the full list of possible relations, both ?with relations and sub endpoints.
+     *
+     * @return array
+     */
+    public static function getFullWithRelations(): array
+    {
+        $validWith = static::$validWithRelations;
+
+        foreach (static::$modelRelations as $relation => $class) {
+            $validWith = array_merge($validWith, $class::getFullWithRelations());
+        }
+
+        return array_unique($validWith);
+    }
+
     public function __call($name, $arguments)
     {
         if (strpos($name, 'get') === 0 && method_exists($this->client->getClientVersion(), ($callMethod = substr_replace($name, (new ReflectionClass(static::class))->getShortName(), 3, 0)))) {
@@ -129,15 +147,16 @@ abstract class Model extends Collection
     }
 
     /**
-     * Set the Client to use for the model.
+     * Sets a relation.
      *
-     * @param \GmodStore\API\Client $client
+     * @param $name
+     * @param $data
      *
-     * @return static
+     * @return $this
      */
-    public function setClient(Client $client): self
+    public function setRelation($name, $data): self
     {
-        $this->client = $client;
+        $this->relations[$name] = $data;
 
         return $this;
     }
@@ -150,6 +169,20 @@ abstract class Model extends Collection
     public function getClient(): Client
     {
         return $this->client;
+    }
+
+    /**
+     * Set the Client to use for the model.
+     *
+     * @param \GmodStore\API\Client $client
+     *
+     * @return static
+     */
+    public function setClient(Client $client): self
+    {
+        $this->client = $client;
+
+        return $this;
     }
 
     /**
@@ -184,7 +217,7 @@ abstract class Model extends Collection
      */
     public function recentlyAttempted()
     {
-        return (\time() - $this->lastAttempted) <= 300;
+        return (time() - $this->lastAttempted) <= 300;
     }
 
     /**
@@ -216,26 +249,11 @@ abstract class Model extends Collection
     }
 
     /**
-     * Sets a relation.
-     *
-     * @param $name
-     * @param $data
-     *
-     * @return $this
-     */
-    public function setRelation($name, $data)
-    {
-        $this->relations[$name] = $data;
-
-        return $this;
-    }
-
-    /**
      * Get array of loaded relations as key => value.
      *
      * @return array
      */
-    public function getRelations()
+    public function getRelations(): array
     {
         return $this->relations;
     }
@@ -245,9 +263,21 @@ abstract class Model extends Collection
      *
      * @return array
      */
-    public function getRelationNames()
+    public function getRelationNames(): array
     {
         return array_keys($this->relations);
+    }
+
+    /**
+     *
+     *
+     * @param string $relation
+     *
+     * @return bool
+     */
+    public function isLoaded($relation): bool
+    {
+        return isset($this->relations[$relation]);
     }
 
     /**
@@ -260,10 +290,10 @@ abstract class Model extends Collection
     public function with(...$relations)
     {
         if ($relations !== $this->withRelations) {
-            \call_user_func_array([$this, 'setWith'], $relations);
+            call_user_func_array([$this, 'setWith'], $relations);
         }
 
-        \call_user_func_array([$this->client, 'with'], $this->withRelations);
+        call_user_func_array([$this->client, 'with'], $this->withRelations);
 
         return $this;
     }
@@ -275,7 +305,7 @@ abstract class Model extends Collection
      *
      * @return $this
      */
-    public function setWith(...$relations)
+    public function setWith(...$relations): self
     {
         if (is_array($relations[0])) {
             $relations = $relations[0];
@@ -299,32 +329,6 @@ abstract class Model extends Collection
 
     public function fresh(...$with)
     {
-    }
 
-    /**
-     * Boot the model.
-     */
-    public static function boot()
-    {
-        static::$booted = true;
-
-        static::$validRelations = array_values(array_unique(array_merge(static::$validRelations, static::$validWithRelations, array_keys(self::$modelRelations))));
-        static::$generatedWithRelations = self::getFullWithRelations();
-    }
-
-    /**
-     * Get the full list of possible relations, both ?with relations and sub endpoints.
-     *
-     * @return array
-     */
-    public static function getFullWithRelations()
-    {
-        $validWith = static::$validWithRelations;
-
-        foreach (static::$modelRelations as $relation => $class) {
-            $validWith = array_merge($validWith, $class::getFullWithRelations());
-        }
-
-        return array_unique($validWith);
     }
 }

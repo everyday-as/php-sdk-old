@@ -4,6 +4,7 @@ namespace GmodStore\API\Models;
 
 use GmodStore\API\Client;
 use GmodStore\API\Model;
+use function call_user_func_array;
 
 class Addon extends Model
 {
@@ -54,9 +55,9 @@ class Addon extends Model
     /**
      * {@inheritdoc}
      */
-    public function fresh()
+    public function fresh(...$with)
     {
-        parent::fresh();
+        parent::fresh(...$with);
 
         if (isset($this->attributes['price'])) {
             $this->attributes['price']['original']['amount'] = $this->attributes['price']['original']['amount'] / 100;
@@ -73,7 +74,7 @@ class Addon extends Model
             $withTransaction ? 'transaction' : '',
         ];
 
-        \call_user_func_array([$this->client, 'with'], $with);
+        call_user_func_array([$this->client, 'with'], $with);
 
         return $this->__call(__FUNCTION__, []);
     }

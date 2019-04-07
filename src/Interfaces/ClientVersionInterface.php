@@ -40,6 +40,14 @@ interface ClientVersionInterface
      */
     public function getCurrentUrl(): string;
 
+
+    /**
+     * @param string $model
+     *
+     * @return mixed
+     */
+    public function setModel($model);
+
     /**
      * Tell the client to get a resource.
      *

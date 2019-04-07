@@ -9,18 +9,25 @@ use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use ReflectionMethod;
+use function array_merge;
+use function is_array;
+use function is_string;
 
 class Client
 {
     const VERSION = '0.0.1';
-
     /**
-     * Current version being used by the client.
-     *
-     * @var ClientVersion
+     * @var array
      */
-    protected $clientVersion;
-
+    public static $modelRelations = [
+        'addon'          => Models\Addon::class,
+        'latest_version' => Models\AddonVersion::class,
+        'team'           => Models\Team::class,
+        'author'         => Models\User::class,
+        'user'           => Models\User::class,
+        'primaryAuthor'  => Models\PrimaryAuthor::class,
+        'primary_author' => Models\PrimaryAuthor::class,
+    ];
     /**
      * List of deprecated API versions to trigger a warning on.
      *
@@ -36,55 +43,42 @@ class Client
      * @var string
      */
     protected static $latestVersion = V2::class;
-
+    /**
+     * Current version being used by the client.
+     *
+     * @var ClientVersion
+     */
+    protected $clientVersion;
     /**
      * API key for gmodstore.
      *
      * @var string
      */
     protected $secret;
-
     /**
      * API endpoint name.
      *
      * @var string
      */
     protected $endpoint = '';
-
     /**
      * API endpoint url path.
      *
      * @var string
      */
     protected $endpointUrl = '';
-
     /**
      * Array of params for endpoint.
      *
      * @var array
      */
     protected $endpointParams = [];
-
     /**
      * Data to send to the endpoint for POST/PUT/PATCH requests.
      *
      * @var array
      */
     protected $endpointData = [];
-
-    /**
-     * @var array
-     */
-    public static $modelRelations = [
-        'addon'          => Models\Addon::class,
-        'latest_version' => Models\AddonVersion::class,
-        'team'           => Models\Team::class,
-        'author'         => Models\User::class,
-        'user'           => Models\User::class,
-        'primaryAuthor'  => Models\PrimaryAuthor::class,
-        'primary_author' => Models\PrimaryAuthor::class,
-    ];
-
     /**
      * The full API request URL.
      *
@@ -151,11 +145,11 @@ class Client
      */
     public function __construct($secret, array $options = [])
     {
-        if (!\is_string($secret) && !\is_array($secret)) {
+        if (!is_string($secret) && !is_array($secret)) {
             throw new InvalidArgumentException('$secret must be a string or an array of options with a [\'secret\'] key');
         }
 
-        if (\is_array($secret)) {
+        if (is_array($secret)) {
             $options = $secret;
             $secret = $options['secret'];
         }
@@ -170,14 +164,60 @@ class Client
     }
 
     /**
+     * Configure options for Guzzle client.
+     *
+     * @param array $options
+     *
+     * @return self
+     */
+    public function setGuzzleOptions(array $options): self
+    {
+        $this->guzzleOptions = $options;
+
+        $this->setHeaders($options['headers'] ?? []);
+
+        return $this;
+    }
+
+    /**
+     * Set Guzzle headers.
+     *
+     * @param array $headers
+     *
+     * @return self
+     */
+    public function setHeaders(array $headers = []): self
+    {
+        if (count($headers) === 0 && isset($this->guzzleOptions['headers'])) {
+            $headers = $this->guzzleOptions['headers'];
+        }
+
+        $this->guzzleOptions['headers'] = array_merge($headers, ['Authorization' => "Bearer {$this->secret}", 'User-Agent' => 'gmodstore/gmodstore-php-sdk v'.self::VERSION]);
+
+        return $this;
+    }
+
+    /**
+     * @param string $secret
+     *
+     * @return $this
+     */
+    public function setSecret($secret): self
+    {
+        $this->secret = $secret;
+
+        return $this->setHeaders();
+    }
+
+    /**
      * Magic __call method to pass methods to the current version client.
      *
      * @param $name
      * @param $arguments
      *
+     * @return $this
      * @throws \ReflectionException
      *
-     * @return $this
      */
     public function __call($name, $arguments)
     {
@@ -199,6 +239,24 @@ class Client
     }
 
     /**
+     * Relations to load.
+     *
+     * @param mixed ...$relations
+     *
+     * @return $this
+     */
+    public function with(...$relations): self
+    {
+        if (isset($relations[0]) && is_array($relations[0])) {
+            $relations = $relations[0];
+        }
+
+        $this->with = array_unique(array_values(array_filter($relations)));
+
+        return $this;
+    }
+
+    /**
      * @return GuzzleClient
      */
     public function getGuzzle(): GuzzleClient
@@ -215,18 +273,6 @@ class Client
     }
 
     /**
-     * @param string $secret
-     *
-     * @return $this
-     */
-    public function setSecret($secret): self
-    {
-        $this->secret = $secret;
-
-        return $this->setHeaders();
-    }
-
-    /**
      * @return \GmodStore\API\ClientVersion
      */
     public function getClientVersion(): ClientVersion
@@ -239,9 +285,9 @@ class Client
      *
      * @param $version
      *
+     * @return $this
      * @throws \Exception
      *
-     * @return $this
      */
     public function setClientVersion($version): self
     {
@@ -265,22 +311,6 @@ class Client
         return $this;
     }
 
-    /**
-     * Configure options for Guzzle client.
-     *
-     * @param array $options
-     *
-     * @return self
-     */
-    public function setGuzzleOptions(array $options): self
-    {
-        $this->guzzleOptions = $options;
-
-        $this->setHeaders($options['headers'] ?? []);
-
-        return $this;
-    }
-
     public function setGuzzleOption($name, $data)
     {
         if ($name === 'headers') {
@@ -288,24 +318,6 @@ class Client
         } else {
             $this->guzzleOptions[$name] = $data;
         }
-
-        return $this;
-    }
-
-    /**
-     * Set Guzzle headers.
-     *
-     * @param array $headers
-     *
-     * @return self
-     */
-    public function setHeaders(array $headers = []): self
-    {
-        if (count($headers) === 0 && isset($this->guzzleOptions['headers'])) {
-            $headers = $this->guzzleOptions['headers'];
-        }
-
-        $this->guzzleOptions['headers'] = \array_merge($headers, ['Authorization' => "Bearer {$this->secret}", 'User-Agent' => 'gmodstore/gmodstore-php-sdk v'.self::VERSION]);
 
         return $this;
     }
@@ -323,6 +335,16 @@ class Client
     }
 
     /**
+     * Get the endpoint URL with the parameters added in.
+     *
+     * @return string
+     */
+    public function buildEndpointUrl(): string
+    {
+        return str_replace(array_keys($this->endpointParams), array_values($this->endpointParams), $this->endpointUrl);
+    }
+
+    /**
      * @param $data
      *
      * @return Collection
@@ -336,10 +358,10 @@ class Client
         foreach ($data as $key => $value) {
             $row = $data[$key];
 
-            if (\is_array($row)) {
+            if (is_array($row)) {
                 if (!empty($row)) {
                     foreach ($row as $subKey => $subRow) {
-                        if (\is_array($subRow)) {
+                        if (is_array($subRow)) {
                             $row[$subKey] = $this->parseData($subRow);
                         }
                     }
@@ -359,24 +381,6 @@ class Client
     }
 
     /**
-     * Relations to load.
-     *
-     * @param mixed ...$relations
-     *
-     * @return $this
-     */
-    public function with(...$relations): self
-    {
-        if (isset($relations[0]) && \is_array($relations[0])) {
-            $relations = $relations[0];
-        }
-
-        $this->with = array_unique(array_values(array_filter($relations)));
-
-        return $this;
-    }
-
-    /**
      * Get the array of ?with relations.
      *
      * @return array
@@ -389,9 +393,9 @@ class Client
     /**
      * Get the current endpoint set on the client.
      *
+     * @return string
      * @throws Exception
      *
-     * @return string
      */
     public function getEndpoint(): string
     {
@@ -457,15 +461,5 @@ class Client
         array_push($this->endpointParams, ...$params);
 
         return $this;
-    }
-
-    /**
-     * Get the endpoint URL with the parameters added in.
-     *
-     * @return string
-     */
-    public function buildEndpointUrl(): string
-    {
-        return str_replace(array_keys($this->endpointParams), array_values($this->endpointParams), $this->endpointUrl);
     }
 }

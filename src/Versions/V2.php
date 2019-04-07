@@ -11,29 +11,13 @@ use GmodStore\API\Models\Coupon;
 use GmodStore\API\Models\Purchase;
 use GmodStore\API\Models\User;
 use InvalidArgumentException;
+use function count;
+use function in_array;
+use function is_numeric;
+use function json_decode;
 
 class V2 extends ClientVersion
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getUrl(): string
-    {
-        return self::URL_BASE.'/v2';
-    }
-
-    public function get(): Collection
-    {
-        $this->client->setGuzzleOption('query', ['with' => implode(',', $this->client->getWith())]);
-        $response = $this->client->setMethod('get')->send();
-        $this->client->setGuzzleOption('query', []);
-
-        $data = \json_decode($response->getBody()->getContents(), true);
-        $data = $data['data'] ?? [];
-
-        return $this->client->parseData($data);
-    }
-
     /**
      * Tell the client to create a resource.
      *
@@ -59,7 +43,7 @@ class V2 extends ClientVersion
         $this->client->setGuzzleOption('form_params', $data);
         $response = $this->client->setMethod('post')->send();
 
-        $data = \json_decode($response->getBody()->getContents());
+        $data = json_decode($response->getBody()->getContents());
         $data = $data->data ?? [];
 
         return $this->client->parseData($data);
@@ -73,38 +57,6 @@ class V2 extends ClientVersion
     public function delete()
     {
         // TODO: Implement delete() method.
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function addons(): self
-    {
-        $this->client->setEndpoint('addons')->setEndpointUrl($this->getUrl().'/addons');
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function addon($addon): self
-    {
-        $addonId = $addon->id ?? $addon;
-
-        $this->addons()->client->appendEndpointUrl('/:addon')->setEndpointParam('addon', $addonId);
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @throws \Exception
-     */
-    public function getAddon($id): Addon
-    {
-        return (new Addon($this->addon($id)->get(), $this->client))->forceExists()->fixRelations();
     }
 
     public function getAddons(...$ids): Collection
@@ -128,12 +80,64 @@ class V2 extends ClientVersion
      *
      * @throws \Exception
      */
+    public function getAddon($id): Addon
+    {
+        return (new Addon($this->addon($id)->get(), $this->client))->forceExists()->fixRelations();
+    }
+
+    public function get(): Collection
+    {
+        $this->client->setGuzzleOption('query', ['with' => implode(',', $this->client->getWith())]);
+        $response = $this->client->setMethod('get')->send();
+        $this->client->setGuzzleOption('query', []);
+
+        $data = json_decode($response->getBody()->getContents(), true);
+        $data = $data['data'] ?? [];
+
+        return $this->client->parseData($data);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addon($addon): self
+    {
+        $addonId = $addon->id ?? $addon;
+
+        $this->addons()->client->appendEndpointUrl('/:addon')->setEndpointParam('addon', $addonId);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addons(): self
+    {
+        $this->setModel(Addon::class)->client->setEndpoint('addons')->setEndpointUrl($this->getUrl().'/addons');
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUrl(): string
+    {
+        return self::URL_BASE.'/v2';
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws \Exception
+     */
     public function getMyAddons(): Collection
     {
         $addons = $this->addons()->get();
 
         if (!$addons->isEmpty()) {
-            $length = \count($addons);
+            $length = count($addons);
             for ($i = 0; $i < $length; $i++) {
                 $addons[$i] = (new Addon($addons[$i], $this->client))->forceExists()->fixRelations();
             }
@@ -143,36 +147,17 @@ class V2 extends ClientVersion
     }
 
     /**
-     * Set the coupons sub endpoint.
-     *
-     * @throws EndpointException
-     * @throws \Exception
-     *
-     * @return $this
-     */
-    public function coupons(): self
-    {
-        if (($currentEndpoint = $this->client->getEndpoint()) !== 'addons') {
-            throw new EndpointException($currentEndpoint.' does not have a coupons endpoint');
-        }
-
-        $this->client->setEndpoint($currentEndpoint.'.coupons')->appendEndpointUrl('/coupons');
-
-        return $this;
-    }
-
-    /**
      * Setup client to retrieve an Addon Coupon resource.
      *
      * @param $id
      *
+     * @return $this
      * @throws \GmodStore\API\Exceptions\EndpointException
      *
-     * @return $this
      */
     public function coupon($id): self
     {
-        if (!\is_numeric($id)) {
+        if (!is_numeric($id)) {
             throw new InvalidArgumentException('Coupon ID must be an integer');
         }
 
@@ -184,20 +169,20 @@ class V2 extends ClientVersion
     }
 
     /**
-     * Sets the purchases sub endpoint.
-     *
-     * @throws EndpointException
-     * @throws \Exception
+     * Set the coupons sub endpoint.
      *
      * @return $this
+     * @throws \Exception
+     *
+     * @throws EndpointException
      */
-    public function purchases(): self
+    public function coupons(): self
     {
-        if (!\in_array($currentEndpoint = $this->client->getEndpoint(), ['addons', 'users'])) {
-            throw new EndpointException($currentEndpoint.' does not have a purchases endpoint');
+        if (($currentEndpoint = $this->client->getEndpoint()) !== 'addons') {
+            throw new EndpointException($currentEndpoint.' does not have a coupons endpoint');
         }
 
-        $this->client->setEndpoint($currentEndpoint.'.purchases')->appendEndpointUrl('/purchases');
+        $this->client->setEndpoint($currentEndpoint.'.coupons')->appendEndpointUrl('/coupons');
 
         return $this;
     }
@@ -234,11 +219,30 @@ class V2 extends ClientVersion
     }
 
     /**
-     * @param int $addonId
+     * Sets the purchases sub endpoint.
      *
+     * @return $this
      * @throws \Exception
      *
+     * @throws EndpointException
+     */
+    public function purchases(): self
+    {
+        if (!in_array($currentEndpoint = $this->client->getEndpoint(), ['addons', 'users'])) {
+            throw new EndpointException($currentEndpoint.' does not have a purchases endpoint');
+        }
+
+        $this->client->setEndpoint($currentEndpoint.'.purchases')->appendEndpointUrl('/purchases');
+
+        return $this;
+    }
+
+    /**
+     * @param int $addonId
+     *
      * @return Collection
+     * @throws \Exception
+     *
      */
     public function getAddonCoupons($addon): Collection
     {

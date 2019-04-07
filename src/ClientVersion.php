@@ -11,6 +11,11 @@ abstract class ClientVersion implements ClientVersionInterface
      */
     protected $client;
 
+    /**
+     * @var \GmodStore\API\Model
+     */
+    protected $model;
+
     public function __construct(Client $client)
     {
         $this->client = $client;
@@ -30,5 +35,17 @@ abstract class ClientVersion implements ClientVersionInterface
     public function getCurrentUrl(): string
     {
         return $this->client->buildEndpointUrl();
+    }
+
+    /**
+     * @param string $model
+     *
+     * @return $this|mixed
+     */
+    public function setModel($model)
+    {
+        $this->model = $model;
+
+        return $this;
     }
 }
