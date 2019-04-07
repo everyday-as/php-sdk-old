@@ -40,7 +40,6 @@ interface ClientVersionInterface
      */
     public function getCurrentUrl(): string;
 
-
     /**
      * @param string $model
      *

@@ -151,9 +151,9 @@ class V2 extends ClientVersion
      *
      * @param $id
      *
-     * @return $this
      * @throws \GmodStore\API\Exceptions\EndpointException
      *
+     * @return $this
      */
     public function coupon($id): self
     {
@@ -171,10 +171,10 @@ class V2 extends ClientVersion
     /**
      * Set the coupons sub endpoint.
      *
-     * @return $this
      * @throws \Exception
-     *
      * @throws EndpointException
+     *
+     * @return $this
      */
     public function coupons(): self
     {
@@ -221,10 +221,10 @@ class V2 extends ClientVersion
     /**
      * Sets the purchases sub endpoint.
      *
-     * @return $this
      * @throws \Exception
-     *
      * @throws EndpointException
+     *
+     * @return $this
      */
     public function purchases(): self
     {
@@ -240,9 +240,9 @@ class V2 extends ClientVersion
     /**
      * @param int $addonId
      *
-     * @return Collection
      * @throws \Exception
      *
+     * @return Collection
      */
     public function getAddonCoupons($addon): Collection
     {

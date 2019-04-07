@@ -269,8 +269,6 @@ abstract class Model extends Collection
     }
 
     /**
-     *
-     *
      * @param string $relation
      *
      * @return bool
@@ -329,6 +327,5 @@ abstract class Model extends Collection
 
     public function fresh(...$with)
     {
-
     }
 }

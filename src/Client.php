@@ -215,9 +215,9 @@ class Client
      * @param $name
      * @param $arguments
      *
-     * @return $this
      * @throws \ReflectionException
      *
+     * @return $this
      */
     public function __call($name, $arguments)
     {
@@ -285,9 +285,9 @@ class Client
      *
      * @param $version
      *
-     * @return $this
      * @throws \Exception
      *
+     * @return $this
      */
     public function setClientVersion($version): self
     {
@@ -393,9 +393,9 @@ class Client
     /**
      * Get the current endpoint set on the client.
      *
-     * @return string
      * @throws Exception
      *
+     * @return string
      */
     public function getEndpoint(): string
     {
