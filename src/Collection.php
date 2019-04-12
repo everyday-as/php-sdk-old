@@ -37,6 +37,11 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
         $this->attributes = $attributes;
     }
 
+    /**
+     * Get the attributes and its elements as an array only.
+     *
+     * @return array
+     */
     public function toArray(): array
     {
         $array = [];
@@ -48,7 +53,12 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
         return $array;
     }
 
-    public function toJson()
+    /**
+     * Convert attributes to json string.
+     *
+     * @return string|null
+     */
+    public function toJson(): ?string
     {
         $json = call_user_func('json_encode', array_merge([$this->toArray()], func_get_args()));
 
@@ -176,6 +186,9 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
         $this->position = $position;
     }
 
+    /**
+     * Update the list of keys in $this->attributes.
+     */
     protected function updateKeys()
     {
         $this->keys = array_keys($this->attributes);

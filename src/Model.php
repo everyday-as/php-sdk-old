@@ -2,6 +2,7 @@
 
 namespace GmodStore\API;
 
+use GmodStore\API\Interfaces\ModelInterface;
 use InvalidArgumentException;
 use ReflectionClass;
 use function array_diff;
@@ -21,7 +22,7 @@ use function strtolower;
 use function substr;
 use function time;
 
-abstract class Model extends Collection
+abstract class Model extends Collection implements ModelInterface
 {
     /**
      * Determine if model class was booted.
@@ -129,22 +130,22 @@ abstract class Model extends Collection
         return array_unique($validWith);
     }
 
-    public function __call($name, $arguments)
-    {
-        if (strpos($name, 'get') === 0 && method_exists($this->client->getClientVersion(), ($callMethod = substr_replace($name, (new ReflectionClass(static::class))->getShortName(), 3, 0)))) {
-            $relation = strtolower(substr($name, 3));
-
-            call_user_func_array([$this->client, 'with'], $this->withRelations);
-
-            $value = call_user_func_array([$this->client, $callMethod], empty($arguments) ? ([$this] ?? []) : $arguments);
-
-            if (!empty($value)) {
-                $this->setRelation($relation, $value);
-            }
-
-            return $value ?? null;
-        }
-    }
+//    public function __call($name, $arguments)
+//    {
+//        if (strpos($name, 'get') === 0 && method_exists($this->client->getClientVersion(), ($callMethod = substr_replace($name, (new ReflectionClass(static::class))->getShortName(), 3, 0)))) {
+//            $relation = strtolower(substr($name, 3));
+//
+//            call_user_func_array([$this->client, 'with'], $this->withRelations);
+//
+//            $value = call_user_func_array([$this->client, $callMethod], empty($arguments) ? ([$this] ?? []) : $arguments);
+//
+//            if (!empty($value)) {
+//                $this->setRelation($relation, $value);
+//            }
+//
+//            return $value ?? null;
+//        }
+//    }
 
     /**
      * Sets a relation.

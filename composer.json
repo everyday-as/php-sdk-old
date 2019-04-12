@@ -22,7 +22,7 @@
         }
     ],
     "require": {
-        "php": ">=7.0.32",
+        "php": ">=7.1.0",
         "ext-json": "*",
         "guzzlehttp/guzzle": "^6.3",
         "xpaw/steamid": "dev-master"
