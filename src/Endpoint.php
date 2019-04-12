@@ -57,7 +57,7 @@ abstract class Endpoint implements EndpointInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function get($id = null)
     {

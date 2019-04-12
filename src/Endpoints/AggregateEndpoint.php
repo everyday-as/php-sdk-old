@@ -28,7 +28,7 @@ class AggregateEndpoint extends Endpoint
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function get($id = null)
     {
