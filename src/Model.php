@@ -98,8 +98,9 @@ abstract class Model extends Collection implements ModelInterface
      * @param $name
      * @param $arguments
      *
-     * @return mixed
      * @throws \Exception
+     *
+     * @return mixed
      */
     public function __call($name, $arguments)
     {
