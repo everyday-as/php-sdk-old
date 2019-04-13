@@ -6,7 +6,6 @@ use GmodStore\API\Model;
 
 class Addon extends Model
 {
-
     /**
      * {@inheritdoc}
      */

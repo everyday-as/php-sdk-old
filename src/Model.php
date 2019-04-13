@@ -123,7 +123,7 @@ abstract class Model extends Collection implements ModelInterface
                 $this->relations[$relation] = $value;
             }
             if (isset(static::$modelRelations[$relation])) {
-                if (!$value instanceof Model) {
+                if (!$value instanceof self) {
                     $value = new static::$modelRelations[$relation]($value);
                 }
 
@@ -153,7 +153,7 @@ abstract class Model extends Collection implements ModelInterface
 
     /**
      * Check if the model was "recently" retrieved from the API based off of
-     * difference provided
+     * difference provided.
      *
      * @param int $difference
      *
