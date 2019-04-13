@@ -62,7 +62,7 @@ class AddonEndpoint extends Endpoint
      */
     public function getPurchases($id = null)
     {
-        return $this->getGeneralSubEndpoint($id, 'reviews');
+        return $this->getGeneralSubEndpoint($id, 'purchases', Purchase::class);
     }
 
     /**
@@ -77,7 +77,7 @@ class AddonEndpoint extends Endpoint
      */
     public function getReviews($id = null)
     {
-        return $this->getGeneralSubEndpoint($id, 'purchases', Purchase::class);
+        return $this->getGeneralSubEndpoint($id, 'reviews');
     }
 
     /**
