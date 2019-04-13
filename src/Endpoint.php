@@ -103,6 +103,7 @@ abstract class Endpoint implements EndpointInterface
             $response = $response->getBody()->getContents();
         } catch (ClientException $e) {
             $response = null;
+
             throw new EndpointException('Request failed: '.$e->getMessage());
         }
 

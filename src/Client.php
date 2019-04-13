@@ -65,7 +65,7 @@ class Client
      */
     protected $endpointPath;
     /**
-     * ?with relations to use
+     * ?with relations to use.
      *
      * @var array
      */
