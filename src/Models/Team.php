@@ -9,11 +9,6 @@ class Team extends Model
     /**
      * {@inheritdoc}
      */
-    public static $endpoint = 'teams';
-
-    /**
-     * {@inheritdoc}
-     */
     protected static $validRelations = [
         'users',
     ];
@@ -21,7 +16,7 @@ class Team extends Model
     /**
      * {@inheritdoc}
      */
-    protected static $validWithRelations = [
+    public static $validWithRelations = [
         'primaryAuthor',
         'primary_author',
     ];
@@ -29,7 +24,7 @@ class Team extends Model
     /**
      * {@inheritdoc}
      */
-    protected static $modelRelations = [
+    public static $modelRelations = [
         'primaryAuthor'  => PrimaryAuthor::class,
         'primary_author' => PrimaryAuthor::class,
     ];

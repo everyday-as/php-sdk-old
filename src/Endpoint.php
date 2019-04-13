@@ -2,9 +2,15 @@
 
 namespace GmodStore\API;
 
+use GmodStore\API\Exceptions\EndpointException;
 use GmodStore\API\Interfaces\EndpointInterface;
+use GuzzleHttp\Exception\ClientException;
+use InvalidArgumentException;
+use function array_diff;
+use function count;
 use function implode;
 use function json_decode;
+use function json_encode;
 
 abstract class Endpoint implements EndpointInterface
 {
@@ -12,17 +18,16 @@ abstract class Endpoint implements EndpointInterface
      * @var string
      */
     protected static $endpointPath;
-
-    /**
-     * @var array
-     */
-    protected static $endpointParameters = [];
-
     /**
      * @var \GmodStore\API\Interfaces\ModelInterface
      */
     protected static $model;
-
+    /**
+     * URL parameters for the current model.
+     *
+     * @var array
+     */
+    protected $endpointParameters = [];
     /**
      * @var int
      */
@@ -32,6 +37,11 @@ abstract class Endpoint implements EndpointInterface
      * @var \GmodStore\API\Client
      */
     protected $client;
+
+    /**
+     * @var array
+     */
+    protected $clientWith = [];
 
     /**
      * Endpoint constructor.
@@ -51,7 +61,20 @@ abstract class Endpoint implements EndpointInterface
     public function setId($id)
     {
         $this->id = $id;
-        static::$endpointParameters = [$id];
+        $this->endpointParameters = [$id];
+
+        return $this;
+    }
+
+    public function with(...$with)
+    {
+        $model = static::$model;
+
+        if (count($diff = array_diff($with, $model::$validWithRelations)) !== 0) {
+            throw new InvalidArgumentException('Invalid $with given for '.$model.': '.json_encode($diff));
+        }
+
+        $this->clientWith = $with;
 
         return $this;
     }
@@ -67,13 +90,27 @@ abstract class Endpoint implements EndpointInterface
             $this->setId($id);
         }
 
-        $response = $this->client->setEndpoint($this->buildUrlPath())->send();
+        $response = $this->send();
 
-        return json_decode($response->getBody()->getContents(), true);
+        return json_decode($response, true);
+    }
+
+    protected function send()
+    {
+        try {
+            $response = $this->client->setEndpoint($this->buildUrlPath())->setWith($this->clientWith)->send();
+
+            $response = $response->getBody()->getContents();
+        } catch (ClientException $e) {
+            $response = null;
+            throw new EndpointException('Request failed: '.$e->getMessage());
+        }
+
+        return $response;
     }
 
     protected function buildUrlPath()
     {
-        return static::$endpointPath.'/'.implode('/', static::$endpointParameters);
+        return static::$endpointPath.'/'.implode('/', $this->endpointParameters);
     }
 }

@@ -6,6 +6,9 @@ use GmodStore\API\Client;
 use GmodStore\API\Collection;
 use GmodStore\API\Endpoint;
 use GmodStore\API\Interfaces\EndpointInterface;
+use InvalidArgumentException;
+use function is_array;
+use function is_null;
 
 class AggregateEndpoint extends Endpoint
 {
@@ -32,8 +35,9 @@ class AggregateEndpoint extends Endpoint
      */
     public function get($id = null)
     {
-        parent::get($id);
-        $id = null;
+        if (!is_null($id) && !is_array($id)) {
+            throw new InvalidArgumentException('Invalid arg given given. IDs must be passed as an array or set earlier');
+        }
 
         $collection = new Collection();
 

@@ -2,12 +2,7 @@
 
 namespace GmodStore\API\Models;
 
-use GmodStore\API\Client;
 use GmodStore\API\Model;
-use InvalidArgumentException;
-use SteamID;
-use function is_int;
-use function is_string;
 
 class User extends Model
 {
@@ -24,23 +19,7 @@ class User extends Model
     /**
      * {@inheritdoc}
      */
-    protected static $validWithRelations = [
+    public static $validWithRelations = [
         'group',
     ];
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __construct($attributes = [], Client $client = null)
-    {
-        if (is_string($attributes) || is_int($attributes)) {
-            try {
-                $xpaw = new SteamID($attributes);
-                $attributes = $xpaw->ConvertToUInt64();
-            } catch (InvalidArgumentException $e) {
-            }
-        }
-
-        parent::__construct($attributes, $client);
-    }
 }

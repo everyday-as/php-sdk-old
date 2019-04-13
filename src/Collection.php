@@ -38,6 +38,79 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     }
 
     /**
+     * Is the Collection empty?
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return count($this->attributes) === 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetSet($offset, $value)
+    {
+        if (empty($offset)) {
+            $this->attributes[] = $value;
+        } else {
+            $this->attributes[$offset] = $value;
+        }
+
+        $this->updateKeys();
+    }
+
+    /**
+     * Update the list of keys in $this->attributes.
+     */
+    protected function updateKeys()
+    {
+        $this->keys = array_keys($this->attributes);
+    }
+
+    /*** ArrayAccess ***/
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->attributes[$offset]);
+        $this->updateKeys();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return count($this->attributes);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        return $this->toJson();
+    }
+
+    /**
+     * Convert attributes to json string.
+     *
+     * @return string|null
+     */
+    public function toJson(): ?string
+    {
+        $json = call_user_func('json_encode', array_merge([$this->toArray()], func_get_args()));
+
+        return $json !== false ? $json : null;
+    }
+
+    /*** Countable ***/
+
+    /**
      * Get the attributes and its elements as an array only.
      *
      * @return array
@@ -53,79 +126,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
         return $array;
     }
 
-    /**
-     * Convert attributes to json string.
-     *
-     * @return string|null
-     */
-    public function toJson(): ?string
-    {
-        $json = call_user_func('json_encode', array_merge([$this->toArray()], func_get_args()));
-
-        return $json !== false ? $json : null;
-    }
-
-    /*** ArrayAccess ***/
-
-    /**
-     * {@inheritdoc}
-     */
-    public function offsetExists($offset)
-    {
-        return isset($this->attributes[$offset]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function offsetGet($offset)
-    {
-        return $this->attributes[$offset] ?? null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function offsetSet($offset, $value)
-    {
-        if (empty($offset)) {
-            $this->attributes[] = $value;
-        } else {
-            $this->attributes[$offset] = $value;
-        }
-        $this->updateKeys();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function offsetUnset($offset)
-    {
-        unset($this->attributes[$offset]);
-        $this->updateKeys();
-    }
-
-    /*** Countable ***/
-
-    /**
-     * {@inheritdoc}
-     */
-    public function count()
-    {
-        return count($this->attributes);
-    }
-
     /*** JsonSerializable ***/
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        return $this->toJson();
-    }
-
-    /*** SeekableIterator, Iterator ***/
 
     /**
      * {@inheritdoc}
@@ -138,6 +139,16 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
         }
 
         return $this->offsetGet($this->position);
+    }
+
+    /*** SeekableIterator, Iterator ***/
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetGet($offset)
+    {
+        return $this->attributes[$offset] ?? null;
     }
 
     /**
@@ -169,6 +180,14 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     /**
      * {@inheritdoc}
      */
+    public function offsetExists($offset)
+    {
+        return isset($this->attributes[$offset]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function rewind()
     {
         $this->position = $this->keys[0];
@@ -180,17 +199,9 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     public function seek($position)
     {
         if (!$this->offsetExists($position)) {
-            throw new OutOfBoundsException('`'.$position.'` invalid seek position');
+            throw new OutOfBoundsException('` Invalid seek position: `'.$position.'`');
         }
 
         $this->position = $position;
-    }
-
-    /**
-     * Update the list of keys in $this->attributes.
-     */
-    protected function updateKeys()
-    {
-        $this->keys = array_keys($this->attributes);
     }
 }

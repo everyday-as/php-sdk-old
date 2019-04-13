@@ -16,16 +16,17 @@ class AddonEndpoint extends Endpoint
     {
         $data = parent::get($id);
         $data = $data['data'] ?? [];
+
         $model = new Collection();
 
-        if (empty($id) && !empty($data)) {
+        if (empty($this->id) && !empty($data)) {
             foreach ($data as $addon) {
-                $model[] = new self::$model($addon);
+                $model[] = new self::$model($addon, $this);
             }
         }
 
-        if (!empty($id)) {
-            $model = new self::$model($data);
+        if (!empty($this->id)) {
+            $model = new self::$model($data, $this);
         }
 
         return $model;

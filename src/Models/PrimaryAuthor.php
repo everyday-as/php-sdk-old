@@ -9,13 +9,6 @@ class PrimaryAuthor extends Model
     /**
      * {@inheritdoc}
      */
-    protected static $validRelations = [
-        'users',
-    ];
-
-    /**
-     * {@inheritdoc}
-     */
     protected static $modelRelations = [
         'user' => User::class,
     ];
