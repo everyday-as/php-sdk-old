@@ -94,6 +94,13 @@ abstract class Model extends Collection implements ModelInterface
         $this->fixRelations();
     }
 
+    /**
+     * @param $name
+     * @param $arguments
+     *
+     * @return mixed
+     * @throws \Exception
+     */
     public function __call($name, $arguments)
     {
         if (substr($name, 0, 3) !== 'get' || strlen($name) === 3) {
@@ -129,6 +136,20 @@ abstract class Model extends Collection implements ModelInterface
     public function toArray(): array
     {
         return array_merge(parent::toArray(), $this->relations->toArray());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetGet($offset)
+    {
+        $return = parent::offsetGet($offset);
+
+        if (empty($parent)) {
+            $return = $this->getRelation($offset);
+        }
+
+        return $return;
     }
 
     /**
@@ -189,6 +210,30 @@ abstract class Model extends Collection implements ModelInterface
         $this->relations[$name] = $data;
 
         return $this;
+    }
+
+    /**
+     * Does this relation exist on the model?
+     *
+     * @param $name
+     *
+     * @return bool
+     */
+    public function hasRelation($name)
+    {
+        return isset($this->relations[$name]);
+    }
+
+    /**
+     * Retrieve a **loaded** relation.
+     *
+     * @param $name
+     *
+     * @return mixed|null
+     */
+    public function getRelation($name)
+    {
+        return $this->hasRelation($name) ? $this->relations[$name] : null;
     }
 
     /**
