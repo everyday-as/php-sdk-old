@@ -81,7 +81,6 @@ class Client
      */
     protected $withRelations = [];
 
-
     /**
      * ClientFixed constructor.
      *
