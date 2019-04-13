@@ -124,9 +124,9 @@ class Client
      * @param $name
      * @param $arguments
      *
-     * @return \GmodStore\API\Endpoints\AggregateEndpoint|mixed
      * @throws \Exception
      *
+     * @return \GmodStore\API\Endpoints\AggregateEndpoint|mixed
      */
     public function __call($name, $arguments)
     {
@@ -163,9 +163,9 @@ class Client
     }
 
     /**
-     * @return mixed|\Psr\Http\Message\ResponseInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      *
+     * @return mixed|\Psr\Http\Message\ResponseInterface
      */
     public function send()
     {

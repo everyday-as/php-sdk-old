@@ -114,10 +114,10 @@ abstract class Endpoint implements EndpointInterface
     }
 
     /**
-     * @return mixed|\Psr\Http\Message\ResponseInterface|null
      * @throws \GuzzleHttp\Exception\GuzzleException
-     *
      * @throws \GmodStore\API\Exceptions\EndpointException
+     *
+     * @return mixed|\Psr\Http\Message\ResponseInterface|null
      */
     protected function send()
     {
@@ -147,11 +147,12 @@ abstract class Endpoint implements EndpointInterface
      * @param      $subEndpoint
      * @param null $model
      *
-     * @return array|\GmodStore\API\Collection
      * @throws \GmodStore\API\Exceptions\EndpointException
      * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @return array|\GmodStore\API\Collection
      */
-    protected function getGeneralSubEndpoint($id = null, $subEndpoint, $model = null)
+    protected function getGeneralSubEndpoint($id, $subEndpoint, $model = null)
     {
         if ($id) {
             $this->setId($id);
