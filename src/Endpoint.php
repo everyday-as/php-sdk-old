@@ -24,7 +24,7 @@ abstract class Endpoint implements EndpointInterface
     public static $model;
 
     /**
-     * Sub endpoints mappings and the models they use
+     * Sub endpoints mappings and the models they use.
      *
      * @var array
      */
@@ -71,8 +71,9 @@ abstract class Endpoint implements EndpointInterface
      * @param $name
      * @param $arguments
      *
-     * @return mixed
      * @throws \GmodStore\API\Exceptions\EndpointException
+     *
+     * @return mixed
      */
     public function __call($name, $arguments)
     {
@@ -132,10 +133,10 @@ abstract class Endpoint implements EndpointInterface
     }
 
     /**
-     * @return mixed|\Psr\Http\Message\ResponseInterface|null
      * @throws \GmodStore\API\Exceptions\EndpointException
-     *
      * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @return mixed|\Psr\Http\Message\ResponseInterface|null
      */
     protected function send()
     {
@@ -165,10 +166,10 @@ abstract class Endpoint implements EndpointInterface
      * @param      $subEndpoint
      * @param null $model
      *
-     * @return array|\GmodStore\API\Collection
      * @throws \GuzzleHttp\Exception\GuzzleException
-     *
      * @throws \GmodStore\API\Exceptions\EndpointException
+     *
+     * @return array|\GmodStore\API\Collection
      */
     protected function getGeneralSubEndpoint($id, $subEndpoint, $model = null)
     {
