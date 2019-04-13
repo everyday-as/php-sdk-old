@@ -6,6 +6,7 @@ use GmodStore\API\Exceptions\EndpointException;
 use GmodStore\API\Interfaces\EndpointInterface;
 use GuzzleHttp\Exception\ClientException;
 use InvalidArgumentException;
+use function array_unshift;
 use function class_exists;
 use function implode;
 use function json_decode;
@@ -21,6 +22,13 @@ abstract class Endpoint implements EndpointInterface
      * @var \GmodStore\API\Interfaces\ModelInterface
      */
     public static $model;
+
+    /**
+     * Sub endpoints mappings and the models they use
+     *
+     * @var array
+     */
+    public static $endpoints = [];
 
     /**
      * URL parameters for the current model.
@@ -63,10 +71,17 @@ abstract class Endpoint implements EndpointInterface
      * @param $name
      * @param $arguments
      *
+     * @return mixed
      * @throws \GmodStore\API\Exceptions\EndpointException
      */
     public function __call($name, $arguments)
     {
+        if (isset(static::$endpoints[$name])) {
+            $this->endpointParameters[] = $name;
+
+            return $this;
+        }
+
         throw new EndpointException('`'.$name.'` is not a valid method.');
     }
 
@@ -78,7 +93,7 @@ abstract class Endpoint implements EndpointInterface
     public function setId($id)
     {
         $this->id = $id;
-        $this->endpointParameters = [$id];
+        array_unshift($this->endpointParameters, $id);
 
         return $this;
     }
@@ -98,6 +113,9 @@ abstract class Endpoint implements EndpointInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \GmodStore\API\Exceptions\EndpointException
      */
     public function get($id = null)
     {
@@ -114,10 +132,10 @@ abstract class Endpoint implements EndpointInterface
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return mixed|\Psr\Http\Message\ResponseInterface|null
      * @throws \GmodStore\API\Exceptions\EndpointException
      *
-     * @return mixed|\Psr\Http\Message\ResponseInterface|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function send()
     {
@@ -137,7 +155,7 @@ abstract class Endpoint implements EndpointInterface
      */
     protected function buildUrlPath()
     {
-        return static::$endpointPath.'/'.implode('/', $this->endpointParameters);
+        return (!empty(static::$endpointPath) ? static::$endpointPath.'/' : '').implode('/', $this->endpointParameters);
     }
 
     /**
@@ -147,10 +165,10 @@ abstract class Endpoint implements EndpointInterface
      * @param      $subEndpoint
      * @param null $model
      *
-     * @throws \GmodStore\API\Exceptions\EndpointException
+     * @return array|\GmodStore\API\Collection
      * @throws \GuzzleHttp\Exception\GuzzleException
      *
-     * @return array|\GmodStore\API\Collection
+     * @throws \GmodStore\API\Exceptions\EndpointException
      */
     protected function getGeneralSubEndpoint($id, $subEndpoint, $model = null)
     {

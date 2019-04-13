@@ -98,9 +98,9 @@ abstract class Model extends Collection implements ModelInterface
      * @param $name
      * @param $arguments
      *
+     * @return mixed
      * @throws \Exception
      *
-     * @return mixed
      */
     public function __call($name, $arguments)
     {
@@ -159,6 +159,14 @@ abstract class Model extends Collection implements ModelInterface
     public static function boot()
     {
         static::$generatedRelations = array_unique(array_merge(static::$validRelations, static::$validWithRelations, array_keys(static::$modelRelations)));
+    }
+
+    /**
+     * @return \GmodStore\API\Endpoint
+     */
+    public static function getEndpoint(): Endpoint
+    {
+        return self::$endpoint;
     }
 
     /**

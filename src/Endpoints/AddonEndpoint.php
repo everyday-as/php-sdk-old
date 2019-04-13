@@ -15,6 +15,10 @@ class AddonEndpoint extends Endpoint
 
     public static $model = Addon::class;
 
+    public static $endpoints = [
+        'versions' => AddonVersion::class,
+    ];
+
     public function get($id = null)
     {
         $data = parent::get($id);
@@ -29,7 +33,15 @@ class AddonEndpoint extends Endpoint
         }
 
         if (!empty($this->id)) {
-            $model = new self::$model($data, $this);
+            if (isset($data['id'])) {
+                $model = new self::$model($data, $this);
+            } else {
+                $class = self::$endpoints[$this->endpointParameters[1]];
+                foreach ($data as $row) {
+                    $model[] = new $class($row);
+                }
+            }
+
         }
 
         return $model;
