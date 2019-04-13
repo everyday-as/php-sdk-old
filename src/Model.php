@@ -124,7 +124,7 @@ abstract class Model extends Collection implements ModelInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function toArray(): array
     {
