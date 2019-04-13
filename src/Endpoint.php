@@ -18,16 +18,19 @@ abstract class Endpoint implements EndpointInterface
      * @var string
      */
     protected static $endpointPath;
+
     /**
      * @var \GmodStore\API\Interfaces\ModelInterface
      */
     protected static $model;
+
     /**
      * URL parameters for the current model.
      *
      * @var array
      */
     protected $endpointParameters = [];
+
     /**
      * @var int
      */
@@ -56,6 +59,11 @@ abstract class Endpoint implements EndpointInterface
         if ($id) {
             $this->setId($id);
         }
+    }
+
+    public function __call($name, $arguments)
+    {
+        throw new EndpointException('`'.$name.'` is not a valid method.');
     }
 
     public function setId($id)
