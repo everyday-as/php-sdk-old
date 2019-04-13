@@ -5,6 +5,8 @@ namespace GmodStore\API;
 use GmodStore\API\Exceptions\EndpointException;
 use GmodStore\API\Interfaces\EndpointInterface;
 use GuzzleHttp\Exception\ClientException;
+use InvalidArgumentException;
+use function class_exists;
 use function implode;
 use function json_decode;
 
@@ -57,11 +59,22 @@ abstract class Endpoint implements EndpointInterface
         }
     }
 
+    /**
+     * @param $name
+     * @param $arguments
+     *
+     * @throws \GmodStore\API\Exceptions\EndpointException
+     */
     public function __call($name, $arguments)
     {
         throw new EndpointException('`'.$name.'` is not a valid method.');
     }
 
+    /**
+     * @param $id
+     *
+     * @return $this
+     */
     public function setId($id)
     {
         $this->id = $id;
@@ -95,16 +108,21 @@ abstract class Endpoint implements EndpointInterface
         }
 
         $response = $this->send();
+        $response = $response->getBody()->getContents();
 
         return json_decode($response, true);
     }
 
+    /**
+     * @return mixed|\Psr\Http\Message\ResponseInterface|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @throws \GmodStore\API\Exceptions\EndpointException
+     */
     protected function send()
     {
         try {
             $response = $this->client->setEndpoint($this->buildUrlPath())->setWith($this->clientWith)->send();
-
-            $response = $response->getBody()->getContents();
         } catch (ClientException $e) {
             $response = null;
 
@@ -114,8 +132,51 @@ abstract class Endpoint implements EndpointInterface
         return $response;
     }
 
+    /**
+     * @return string
+     */
     protected function buildUrlPath()
     {
         return static::$endpointPath.'/'.implode('/', $this->endpointParameters);
+    }
+
+    /**
+     * Generalized retrieval of a sub endpoint that is similar for multiple models.
+     *
+     * @param null $id
+     * @param      $subEndpoint
+     * @param null $model
+     *
+     * @return array|\GmodStore\API\Collection
+     * @throws \GmodStore\API\Exceptions\EndpointException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    protected function getGeneralSubEndpoint($id = null, $subEndpoint, $model = null)
+    {
+        if ($id) {
+            $this->setId($id);
+        }
+
+        $this->endpointParameters[] = $subEndpoint;
+
+        $response = $this->send();
+        $response = $response->getBody()->getContents();
+
+        $data = json_decode($response, true);
+        $data = $data !== false ? $data['data'] : [];
+
+        $collection = new Collection();
+
+        if (empty($model)) {
+            $collection->setAttributes($data);
+        } elseif (!class_exists($model)) {
+            throw new InvalidArgumentException('`'.$model.'` does not exist.');
+        } else {
+            foreach ($data as $row) {
+                $collection[] = new $model($row);
+            }
+        }
+
+        return $collection;
     }
 }

@@ -105,6 +105,9 @@ class Client
         $this->parseOptions($options);
     }
 
+    /**
+     * @param array $options
+     */
     protected function parseOptions(array $options = [])
     {
         if (isset($options['guzzle']) && $options['guzzle'] instanceof GuzzleClient) {
@@ -117,6 +120,14 @@ class Client
         $this->guzzle = new GuzzleClient($this->guzzleOptions);
     }
 
+    /**
+     * @param $name
+     * @param $arguments
+     *
+     * @return \GmodStore\API\Endpoints\AggregateEndpoint|mixed
+     * @throws \Exception
+     *
+     */
     public function __call($name, $arguments)
     {
         if (isset(self::$endpoints[$name])) {
@@ -138,6 +149,12 @@ class Client
         throw new Exception('`'.$name.'` is not a valid method.');
     }
 
+    /**
+     * @param $name
+     * @param $value
+     *
+     * @return $this
+     */
     public function setGuzzleOption($name, $value)
     {
         $this->guzzleOptions[$name] = $value;
@@ -145,6 +162,11 @@ class Client
         return $this;
     }
 
+    /**
+     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     */
     public function send()
     {
         return $this->guzzle->request($this->requestMethod, $this->endpointPath, $this->buildGuzzleOptions());

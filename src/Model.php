@@ -2,11 +2,20 @@
 
 namespace GmodStore\API;
 
+use Exception;
+use GmodStore\API\Exceptions\EndpointException;
 use GmodStore\API\Interfaces\ModelInterface;
+use InvalidArgumentException;
 use function array_keys;
 use function array_merge;
 use function array_unique;
+use function array_unshift;
+use function call_user_func_array;
 use function in_array;
+use function lcfirst;
+use function method_exists;
+use function strlen;
+use function substr;
 use function time;
 
 abstract class Model extends Collection implements ModelInterface
@@ -85,6 +94,43 @@ abstract class Model extends Collection implements ModelInterface
         $this->fixRelations();
     }
 
+    public function __call($name, $arguments)
+    {
+        if (substr($name, 0, 3) !== 'get' || strlen($name) === 3) {
+            throw new InvalidArgumentException('`'.$name.'` is an invalid method.');
+        }
+
+        $relation = lcfirst(substr($name, 3));
+
+        if (empty(static::$endpoint)) {
+            throw new Exception('No endpoint instance has been set on this model.');
+        }
+
+        if (!in_array($relation, static::$validRelations)) {
+            throw new InvalidArgumentException('`'.$name.'` is not a valid relation on: '.static::class.'.');
+        }
+
+        if (!method_exists(static::$endpoint, $name)) {
+            throw new EndpointException('`'.$name.'` method does not exist on endpoint.');
+        }
+
+        array_unshift($arguments, $this->attributes['id']);
+
+        $result = call_user_func_array([static::$endpoint, $name], $arguments);
+
+        $this->setRelation($relation, $result);
+
+        return $result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function toArray(): array
+    {
+        return array_merge(parent::toArray(), $this->relations->toArray());
+    }
+
     /**
      * Boot the model.
      */
@@ -118,7 +164,7 @@ abstract class Model extends Collection implements ModelInterface
             }
             if (isset(static::$modelRelations[$relation])) {
                 if (!$value instanceof self) {
-                    $value = new static::$modelRelations[$relation]($value);
+                    $value = new static::$modelRelations[$relation]($value, static::$endpoint);
                 }
 
                 $this->relations[$relation] = $value;

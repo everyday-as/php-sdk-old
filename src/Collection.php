@@ -37,6 +37,22 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
     }
 
     /**
+     * @return array
+     */
+    public function getAttributes(): array
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @param array $attributes
+     */
+    public function setAttributes(array $attributes): void
+    {
+        $this->attributes = $attributes;
+    }
+
+    /**
      * Is the Collection empty?
      *
      * @return bool
