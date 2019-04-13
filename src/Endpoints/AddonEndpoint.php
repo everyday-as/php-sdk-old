@@ -8,9 +8,9 @@ use GmodStore\API\Models\Addon;
 
 class AddonEndpoint extends Endpoint
 {
-    protected static $endpointPath = 'addons';
+    public static $endpointPath = 'addons';
 
-    protected static $model = Addon::class;
+    public static $model = Addon::class;
 
     public function get($id = null)
     {

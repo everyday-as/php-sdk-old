@@ -6,6 +6,7 @@ use Exception;
 use GmodStore\API\Endpoints\AddonEndpoint;
 use GmodStore\API\Endpoints\AggregateEndpoint;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\RequestOptions;
 use function array_keys;
 use function array_merge_recursive;
 use function array_values;
@@ -22,6 +23,7 @@ class Client
      * @var string
      */
     const API_URL = 'https://api.gmodstore.com/v2/';
+
     /**
      * Endpoint mappings used in __call() cause I'm lazy.
      *
@@ -30,46 +32,55 @@ class Client
     protected static $endpoints = [
         'addons' => AddonEndpoint::class,
     ];
+
     /**
      * Booted endpoints so they don't have to be instantiated again.
      *
      * @var array
      */
     protected static $bootedEndpoints = [];
+
     /**
      * @var string
      */
     protected $secret;
+
     /**
      * Client options.
      *
      * @var array
      */
     protected $options = [];
+
     /**
      * @var \GuzzleHttp\Client
      */
     protected $guzzle;
+
     /**
      * @var array
      */
     protected $guzzleOptions = [];
+
     /**
      * Request method.
      *
      * @var string
      */
     protected $requestMethod = 'GET';
+
     /**
      * @var string
      */
     protected $endpointPath;
+
     /**
      * ?with relations to use.
      *
      * @var array
      */
     protected $withRelations = [];
+
 
     /**
      * ClientFixed constructor.
@@ -151,7 +162,7 @@ class Client
             'query'       => [
                 'with' => implode(',', $this->withRelations),
             ],
-            'synchronous' => true,
+            'synchronous' => RequestOptions::SYNCHRONOUS,
         ]);
     }
 

@@ -27,6 +27,7 @@ class AggregateEndpoint extends Endpoint
         parent::__construct($client);
 
         $this->endpoint = $endpoint;
+        self::$model = $endpoint::$model;
         $this->ids = $ids;
     }
 
@@ -41,6 +42,7 @@ class AggregateEndpoint extends Endpoint
 
         $collection = new Collection();
 
+        $this->endpoint->with(...$this->clientWith);
         foreach ($this->ids as $id) {
             $collection[] = $this->endpoint->get($id);
         }

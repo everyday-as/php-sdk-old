@@ -17,12 +17,12 @@ abstract class Endpoint implements EndpointInterface
     /**
      * @var string
      */
-    protected static $endpointPath;
+    public static $endpointPath;
 
     /**
      * @var \GmodStore\API\Interfaces\ModelInterface
      */
-    protected static $model;
+    public static $model;
 
     /**
      * URL parameters for the current model.

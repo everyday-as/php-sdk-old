@@ -17,40 +17,40 @@ abstract class Model extends Collection implements ModelInterface
      * @var array
      */
     public static $validRelations = [];
+
     /**
      * Valid array of ?with relations for a model.
      *
      * @var array
      */
     public static $validWithRelations = [];
+
     /**
      * Mapping of relation -> model class.
      *
      * @var array
      */
     public static $modelRelations = [];
+
     /**
      * Automatic list of ALL possible relation names: ?with and sub endpoints.
      *
      * @var array
      */
     public static $generatedRelations = [];
+
     /**
      * @var \GmodStore\API\Endpoint
      */
     protected static $endpoint;
-    /**
-     * List of booted models.
-     *
-     * @var array
-     */
-    protected static $bootedModels = [];
+
     /**
      * Epoch timestamp of when the model was last retrieved/attempted.
      *
      * @var int
      */
     public $lastAttempted;
+
     /**
      * Loaded relationships for the model.
      *
@@ -79,9 +79,7 @@ abstract class Model extends Collection implements ModelInterface
             static::$endpoint = $endpoint;
         }
 
-        if (!in_array(static::class, static::$bootedModels)) {
-            static::boot();
-        }
+        static::boot();
 
         $this->relations = new Collection();
         $this->fixRelations();
@@ -92,11 +90,7 @@ abstract class Model extends Collection implements ModelInterface
      */
     public static function boot()
     {
-        if (!in_array(static::class, self::$bootedModels)) {
-            self::$bootedModels[] = static::class;
-        }
-
-        self::$generatedRelations = array_unique(array_merge(static::$validRelations, static::$validWithRelations, array_keys(static::$modelRelations)));
+        static::$generatedRelations = array_unique(array_merge(static::$validRelations, static::$validWithRelations, array_keys(static::$modelRelations)));
     }
 
     /**
@@ -107,7 +101,7 @@ abstract class Model extends Collection implements ModelInterface
     public function fixRelations()
     {
         $allRelationNames = self::$generatedRelations;
-        $mergedData = array_merge($this->attributes, $this->relations->toArray());
+        $this->attributes = $mergedData = array_merge($this->attributes, $this->relations->toArray());
         $this->relations = new Collection();
 
         foreach ($mergedData as $relation => $value) {
