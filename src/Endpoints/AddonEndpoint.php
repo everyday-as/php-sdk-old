@@ -41,7 +41,6 @@ class AddonEndpoint extends Endpoint
                     $model[] = new $class($row);
                 }
             }
-
         }
 
         return $model;
