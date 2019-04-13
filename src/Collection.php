@@ -10,7 +10,6 @@ use SeekableIterator;
 use function array_keys;
 use function array_merge;
 use function array_search;
-use function call_user_func;
 use function count;
 use function func_get_args;
 use function is_null;
@@ -103,7 +102,7 @@ class Collection implements ArrayAccess, Countable, JsonSerializable, SeekableIt
      */
     public function toJson(): ?string
     {
-        $json = call_user_func('json_encode', array_merge([$this->toArray()], func_get_args()));
+        $json = call_user_func_array('json_encode', array_merge([$this->toArray()], func_get_args()));
 
         return $json !== false ? $json : null;
     }

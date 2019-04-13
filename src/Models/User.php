@@ -9,7 +9,7 @@ class User extends Model
     /**
      * {@inheritdoc}
      */
-    protected static $validRelations = [
+    public static $validRelations = [
         'addons',
         'purchases',
         'teams',

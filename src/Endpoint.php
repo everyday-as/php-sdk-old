@@ -5,12 +5,8 @@ namespace GmodStore\API;
 use GmodStore\API\Exceptions\EndpointException;
 use GmodStore\API\Interfaces\EndpointInterface;
 use GuzzleHttp\Exception\ClientException;
-use InvalidArgumentException;
-use function array_diff;
-use function count;
 use function implode;
 use function json_decode;
-use function json_encode;
 
 abstract class Endpoint implements EndpointInterface
 {
@@ -76,11 +72,11 @@ abstract class Endpoint implements EndpointInterface
 
     public function with(...$with)
     {
-        $model = static::$model;
-
-        if (count($diff = array_diff($with, $model::$validWithRelations)) !== 0) {
-            throw new InvalidArgumentException('Invalid $with given for '.$model.': '.json_encode($diff));
-        }
+//        $model = static::$model;
+//
+//        if (count($diff = array_diff($with, $model::$validWithRelations)) !== 0) {
+//            throw new InvalidArgumentException('Invalid $with given for '.$model.': '.json_encode($diff));
+//        }
 
         $this->clientWith = $with;
 

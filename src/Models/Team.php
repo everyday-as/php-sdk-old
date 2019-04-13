@@ -9,7 +9,7 @@ class Team extends Model
     /**
      * {@inheritdoc}
      */
-    protected static $validRelations = [
+    public static $validRelations = [
         'users',
     ];
 
