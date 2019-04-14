@@ -40,6 +40,11 @@ class AggregateEndpoint implements EndpointInterface
      */
     protected $ids;
 
+    /**
+     * @var array
+     */
+    protected $clientWith = [];
+
     public function __construct(Endpoint $endpoint, array $ids = [])
     {
         $this->endpoint = $endpoint;
@@ -74,6 +79,13 @@ class AggregateEndpoint implements EndpointInterface
         throw new EndpointException('`'.$name.'` is not a valid method.');
     }
 
+    public function with(...$with)
+    {
+        $this->clientWith = $with;
+
+        return $this;
+    }
+
     /**
      * {@inheritdoc}
      *
@@ -94,6 +106,9 @@ class AggregateEndpoint implements EndpointInterface
             if ($this->subEndpoint) {
                 call_user_func_array([$this->endpoint, $this->subEndpoint], $this->subEndpointArgs);
             }
+            if (!empty($this->clientWith)) {
+                call_user_func_array([$this->endpoint, 'with'], $this->clientWith);
+            }
 
             $data = $this->endpoint->get();
 
@@ -104,8 +119,9 @@ class AggregateEndpoint implements EndpointInterface
             }
         }
 
-        $this->subEndpoint = null;
-        $this->subEndpointArgs = [];
+        // reset
+        $this->subEndpoint = $this->subEndpointModel = null;
+        $this->clientWith = $this->subEndpointArgs = [];
 
         return $collection;
     }

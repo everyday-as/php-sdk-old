@@ -84,7 +84,7 @@ abstract class Model extends Collection implements ModelInterface
     {
         parent::__construct($attributes);
 
-        if ($endpoint) {
+        if ($endpoint && empty(static::$endpoint)) {
             static::$endpoint = $endpoint;
         }
 
