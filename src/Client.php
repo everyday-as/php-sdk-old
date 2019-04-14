@@ -4,13 +4,11 @@ namespace GmodStore\API;
 
 use Exception;
 use GmodStore\API\Endpoints\AddonEndpoint;
-use GmodStore\API\Endpoints\AggregateEndpoint;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\RequestOptions;
 use function array_keys;
 use function array_merge_recursive;
 use function array_values;
-use function count;
 use function implode;
 use function is_array;
 use function str_replace;
@@ -30,6 +28,15 @@ class Client
      * @var array
      */
     protected static $endpoints = [
+        'addon' => AddonEndpoint::class,
+    ];
+
+    /**
+     * Aggregate Endpoint mappings to their singular endpoints used in __call() cause I'm lazy.
+     *
+     * @var array
+     */
+    protected static $aggregateEndpoints = [
         'addons' => AddonEndpoint::class,
     ];
 
@@ -124,23 +131,19 @@ class Client
      * @param $name
      * @param $arguments
      *
+     * @return \GmodStore\API\AggregateEndpoint|mixed
      * @throws \Exception
      *
-     * @return \GmodStore\API\Endpoints\AggregateEndpoint|mixed
      */
     public function __call($name, $arguments)
     {
-        if (isset(self::$endpoints[$name])) {
+        if (isset(self::$endpoints[$name]) || isset(self::$aggregateEndpoints[$name])) {
             if (!isset(self::$bootedEndpoints[$name])) {
-                self::$bootedEndpoints[$name] = new self::$endpoints[$name]($this);
+                self::$bootedEndpoints[$name] = isset(self::$endpoints[$name]) ? new self::$endpoints[$name]($this, ...$arguments) : new self::$aggregateEndpoints[$name]($this);
             }
 
-            if (count($arguments) > 1) {
-                return new AggregateEndpoint($this, self::$bootedEndpoints[$name], $arguments);
-            }
-
-            if (count($arguments) === 1) {
-                self::$bootedEndpoints[$name]->setId($arguments[0]);
+            if (isset(self::$aggregateEndpoints[$name])) {
+                return new AggregateEndpoint(self::$bootedEndpoints[$name], $arguments);
             }
 
             return self::$bootedEndpoints[$name];
@@ -163,9 +166,9 @@ class Client
     }
 
     /**
+     * @return mixed|\Psr\Http\Message\ResponseInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      *
-     * @return mixed|\Psr\Http\Message\ResponseInterface
      */
     public function send()
     {

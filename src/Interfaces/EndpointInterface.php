@@ -5,9 +5,9 @@ namespace GmodStore\API\Interfaces;
 interface EndpointInterface
 {
     /**
-     * @param array|int|null $id
+     * @param array|int|null
      *
      * @return \GmodStore\API\Collection|\GmodStore\API\Interfaces\ModelInterface|array
      */
-    public function get($id = null);
+    public function get();
 }

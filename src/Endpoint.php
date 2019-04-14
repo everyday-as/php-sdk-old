@@ -31,6 +31,11 @@ abstract class Endpoint implements EndpointInterface
     public static $endpoints = [];
 
     /**
+     * @var \GmodStore\API\Interfaces\ModelInterface
+     */
+    protected $currentModel;
+
+    /**
      * URL parameters for the current model.
      *
      * @var array
@@ -65,25 +70,48 @@ abstract class Endpoint implements EndpointInterface
         if ($id) {
             $this->setId($id);
         }
+
+        $this->currentModel = static::$model;
     }
 
     /**
      * @param $name
      * @param $arguments
      *
+     * @return mixed
      * @throws \GmodStore\API\Exceptions\EndpointException
      *
-     * @return mixed
      */
     public function __call($name, $arguments)
     {
-        if (isset(static::$endpoints[$name])) {
+        if (static::hasEndpoint($name)) {
+
             $this->endpointParameters[] = $name;
+
+            if (!empty($arguments)) {
+                $this->endpointParameters[] = $arguments[0];
+            }
+
+            $this->currentModel = static::$endpoints[$name];
 
             return $this;
         }
 
         throw new EndpointException('`'.$name.'` is not a valid method.');
+    }
+
+    public static function hasEndpoint($endpoint)
+    {
+        return isset(static::$endpoints[$endpoint]);
+    }
+
+    public static function getEndpointModel($endpoint)
+    {
+        if (!static::hasEndpoint($endpoint)) {
+            throw new InvalidArgumentException('`'.$endpoint.'` mapping does not exist.');
+        }
+
+        return static::$endpoints[$endpoint];
     }
 
     /**
@@ -94,19 +122,20 @@ abstract class Endpoint implements EndpointInterface
     public function setId($id)
     {
         $this->id = $id;
-        array_unshift($this->endpointParameters, $id);
+
+        if (!empty($this->endpointParameters)) {
+            array_unshift($this->endpointParameters, $id);
+        } else {
+            $this->endpointParameters = [$id];
+            $this->currentModel = static::$model;
+        }
+
 
         return $this;
     }
 
     public function with(...$with)
     {
-//        $model = static::$model;
-//
-//        if (count($diff = array_diff($with, $model::$validWithRelations)) !== 0) {
-//            throw new InvalidArgumentException('Invalid $with given for '.$model.': '.json_encode($diff));
-//        }
-
         $this->clientWith = $with;
 
         return $this;
@@ -129,14 +158,18 @@ abstract class Endpoint implements EndpointInterface
         $response = $this->send();
         $response = $response->getBody()->getContents();
 
+        // reset
+        $this->id = null;
+        $this->clientWith = $this->endpointParameters = [];
+
         return json_decode($response, true);
     }
 
     /**
-     * @throws \GmodStore\API\Exceptions\EndpointException
+     * @return mixed|\Psr\Http\Message\ResponseInterface|null
      * @throws \GuzzleHttp\Exception\GuzzleException
      *
-     * @return mixed|\Psr\Http\Message\ResponseInterface|null
+     * @throws \GmodStore\API\Exceptions\EndpointException
      */
     protected function send()
     {
@@ -149,6 +182,26 @@ abstract class Endpoint implements EndpointInterface
         }
 
         return $response;
+    }
+
+    /**
+     * @return array
+     */
+    public function getEndpointParameters(): array
+    {
+        return $this->endpointParameters;
+    }
+
+    /**
+     * @param array $endpointParameters
+     *
+     * @return \GmodStore\API\Endpoint
+     */
+    public function setEndpointParameters(array $endpointParameters)
+    {
+        $this->endpointParameters = $endpointParameters;
+
+        return $this;
     }
 
     /**
@@ -166,10 +219,10 @@ abstract class Endpoint implements EndpointInterface
      * @param      $subEndpoint
      * @param null $model
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return array|\GmodStore\API\Collection
      * @throws \GmodStore\API\Exceptions\EndpointException
      *
-     * @return array|\GmodStore\API\Collection
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function getGeneralSubEndpoint($id, $subEndpoint, $model = null)
     {
