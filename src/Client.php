@@ -9,9 +9,12 @@ use GuzzleHttp\RequestOptions;
 use function array_keys;
 use function array_merge_recursive;
 use function array_values;
+use function call_user_func_array;
 use function implode;
 use function is_array;
+use function lcfirst;
 use function str_replace;
+use function substr;
 
 class Client
 {
@@ -137,6 +140,13 @@ class Client
      */
     public function __call($name, $arguments)
     {
+        $returnModel = false;
+
+        if (substr($name, 0, 3) === 'get') {
+            $returnModel = true;
+            $name = lcfirst(substr($name, 3));
+        }
+
         if (isset(self::$endpoints[$name]) || isset(self::$aggregateEndpoints[$name])) {
             if (!isset(self::$bootedEndpoints[$name])) {
                 self::$bootedEndpoints[$name] = isset(self::$endpoints[$name]) ? new self::$endpoints[$name]($this, ...$arguments) : new self::$aggregateEndpoints[$name]($this);
@@ -146,7 +156,7 @@ class Client
                 return new AggregateEndpoint(self::$bootedEndpoints[$name], $arguments);
             }
 
-            return self::$bootedEndpoints[$name];
+            return $returnModel ? call_user_func_array([self::$bootedEndpoints[$name], 'get'], $arguments) : self::$bootedEndpoints[$name];
         }
 
         throw new Exception('`'.$name.'` is not a valid method.');

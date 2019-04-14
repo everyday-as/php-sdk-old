@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use function array_unshift;
 use function class_exists;
 use function implode;
+use function in_array;
 use function json_decode;
 
 abstract class Endpoint implements EndpointInterface
@@ -122,7 +123,7 @@ abstract class Endpoint implements EndpointInterface
     {
         $this->id = $id;
 
-        if (!empty($this->endpointParameters)) {
+        if (!empty($this->endpointParameters) && !in_array($id, $this->endpointParameters)) {
             array_unshift($this->endpointParameters, $id);
         } else {
             $this->endpointParameters = [$id];
@@ -156,11 +157,30 @@ abstract class Endpoint implements EndpointInterface
         $response = $this->send();
         $response = $response->getBody()->getContents();
 
+        $data = json_decode($response, true);
+        $data = $data['data'] ?? [];
+
+        $model = new Collection();
+
+        if (empty($this->id) && empty($id) && !empty($data)) {
+            foreach ($data as $addon) {
+                $model[] = new $this->currentModel($addon, $this);
+            }
+        }
+
+        if (isset($data['id'])) {
+            $model = new $this->currentModel($data, $this);
+        } else {
+            foreach ($data as $row) {
+                $model[] = new $this->currentModel($row);
+            }
+        }
+
         // reset
         $this->id = null;
         $this->clientWith = $this->endpointParameters = [];
 
-        return json_decode($response, true);
+        return $model;
     }
 
     /**
