@@ -78,14 +78,13 @@ abstract class Endpoint implements EndpointInterface
      * @param $name
      * @param $arguments
      *
-     * @return mixed
      * @throws \GmodStore\API\Exceptions\EndpointException
      *
+     * @return mixed
      */
     public function __call($name, $arguments)
     {
         if (static::hasEndpoint($name)) {
-
             $this->endpointParameters[] = $name;
 
             if (!empty($arguments)) {
@@ -130,7 +129,6 @@ abstract class Endpoint implements EndpointInterface
             $this->currentModel = static::$model;
         }
 
-
         return $this;
     }
 
@@ -166,10 +164,10 @@ abstract class Endpoint implements EndpointInterface
     }
 
     /**
-     * @return mixed|\Psr\Http\Message\ResponseInterface|null
      * @throws \GuzzleHttp\Exception\GuzzleException
-     *
      * @throws \GmodStore\API\Exceptions\EndpointException
+     *
+     * @return mixed|\Psr\Http\Message\ResponseInterface|null
      */
     protected function send()
     {
@@ -219,10 +217,10 @@ abstract class Endpoint implements EndpointInterface
      * @param      $subEndpoint
      * @param null $model
      *
-     * @return array|\GmodStore\API\Collection
      * @throws \GmodStore\API\Exceptions\EndpointException
-     *
      * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @return array|\GmodStore\API\Collection
      */
     protected function getGeneralSubEndpoint($id, $subEndpoint, $model = null)
     {

@@ -54,10 +54,10 @@ class AddonEndpoint extends Endpoint
      *
      * @param null $id
      *
-     * @return array|\GmodStore\API\Collection
      * @throws \GuzzleHttp\Exception\GuzzleException
-     *
      * @throws \GmodStore\API\Exceptions\EndpointException
+     *
+     * @return array|\GmodStore\API\Collection
      */
     public function getCoupons($id = null)
     {
@@ -69,10 +69,10 @@ class AddonEndpoint extends Endpoint
      *
      * @param null $id
      *
-     * @return array|\GmodStore\API\Collection
      * @throws \GuzzleHttp\Exception\GuzzleException
-     *
      * @throws \GmodStore\API\Exceptions\EndpointException
+     *
+     * @return array|\GmodStore\API\Collection
      */
     public function getPurchases($id = null)
     {
@@ -84,10 +84,10 @@ class AddonEndpoint extends Endpoint
      *
      * @param null $id
      *
-     * @return array|\GmodStore\API\Collection
      * @throws \GuzzleHttp\Exception\GuzzleException
-     *
      * @throws \GmodStore\API\Exceptions\EndpointException
+     *
+     * @return array|\GmodStore\API\Collection
      */
     public function getReviews($id = null)
     {
@@ -99,10 +99,10 @@ class AddonEndpoint extends Endpoint
      *
      * @param null $id
      *
-     * @return array|\GmodStore\API\Collection
      * @throws \GuzzleHttp\Exception\GuzzleException
-     *
      * @throws \GmodStore\API\Exceptions\EndpointException
+     *
+     * @return array|\GmodStore\API\Collection
      */
     public function getVersions($id = null)
     {

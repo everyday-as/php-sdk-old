@@ -51,8 +51,9 @@ class AggregateEndpoint implements EndpointInterface
      * @param $name
      * @param $arguments
      *
-     * @return $this
      * @throws \GmodStore\API\Exceptions\EndpointException
+     *
+     * @return $this
      */
     public function __call($name, $arguments)
     {
